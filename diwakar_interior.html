@@ -6,7 +6,7 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
         #ui { position: absolute; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; pointer-events: none; z-index: 10; }
-        .controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; z-index: 10; }
+        .controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; z-index: 10; padding: 0 10px; }
         button { padding: 12px 20px; cursor: pointer; background: #800000; color: white; border: none; border-radius: 5px; font-weight: bold; transition: 0.3s; min-width: 120px; }
         button:hover { background: #b00000; transform: translateY(-2px); }
         .exit-btn { background: #444; }
@@ -19,7 +19,9 @@
     </div>
 
     <div class="controls">
+        <button onclick="changeView('entrance.jpg')">Entrance View</button> 
         <button onclick="changeView('image_hallway.jpg')">Hallway View</button> 
+        <button onclick="changeView('hall2.jpg')">Hall 2 View</button> 
         <button onclick="changeView('image_21c14f.jpg')">Balcony View</button>
         <button onclick="changeView('image_21bcb2.jpg')">Courtyard View</button>
         <button class="exit-btn" onclick="window.location.href='index.html'">Exit to Campus</button>
@@ -46,24 +48,19 @@
             scene.add(sphere);
 
             const loader = new THREE.TextureLoader();
-            loader.setCrossOrigin('anonymous');
             
             window.changeView = function(fileName) {
-                // Using a placeholder image if the local file isn't found
-                // REPLACE THIS LINK with your actual image path when ready
-                const defaultImage = 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pano_interior_of_Saint_Sulpice%2C_Paris.jpg';
-                
+                // Loader image load karega aur sphere texture update karega
                 loader.load(fileName, function(texture) {
                     material.map = texture;
                     material.needsUpdate = true;
                 }, undefined, function(err) {
-                    console.warn("Could not load local image: " + fileName + ". Loading placeholder instead.");
-                    loader.load(defaultImage, (tex) => { material.map = tex; material.needsUpdate = true; });
+                    console.error("Error loading image: ", fileName);
                 });
             };
 
-            // Initial view
-            changeView('image_hallway.jpg');
+            // Application 'entrance.jpg' se start hogi
+            changeView('entrance.jpg');
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
@@ -75,6 +72,8 @@
         }
 
         function onPointerDown(event) {
+            // Pointer event buttons ke upar click na ho isliye check
+            if (event.target.tagName === 'BUTTON') return;
             isUserInteracting = true;
             onPointerDownMouseX = event.clientX;
             onPointerDownMouseY = event.clientY;

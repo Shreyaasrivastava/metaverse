@@ -113,3 +113,56 @@ kbd {
   border-radius: 3px;
   font-family: monospace;
 }
+#info-modal { 
+        /* Keep your existing style properties, but update these: */
+        border-bottom: 2px solid #eee8aa; 
+        padding-bottom: 5px; 
+        
+        /* NEW PROPERTIES TO FIX THE CLICKING ISSUE */
+        z-index: 10000 !important;   /* Makes it stay on top of the 3D scene */
+        pointer-events: auto !important; /* Ensures the button inside can be clicked */
+        cursor: default; /* Shows the normal mouse arrow over the modal */
+    }
+
+    kbd { 
+        background: #eee; 
+        border: 1px solid #ccc; 
+        padding: 2px 4px; 
+        border-radius: 3px; 
+    }
+    #weather-hud {
+        position: absolute;
+        bottom: 20px; /* Changed from top to bottom */
+        left: 20px;
+        width: 200px;
+        background: rgba(128, 0, 0, 0.7); 
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        border-left: 5px solid #ffd700; 
+        font-family: 'Segoe UI', sans-serif;
+        z-index: 1000;
+        display: none; 
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+        .hud-title { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            color: #ffd700; 
+        }
+
+        #hud-temp { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            margin: 5px 0; 
+        }
+
+        #hud-desc { 
+            font-size: 0.9rem; 
+            opacity: 0.8; 
+        }
+
+    

@@ -49,13 +49,67 @@ const chatHistory = document.getElementById("chat-history");
     // --- VOICE UTILITY ---
 let lastSpokenLocation = "";
 
+
+
 function speak(text) {
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.9;
-  utterance.pitch = 1.0;
-  window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const indianVoice = voices.find(v => v.lang === 'hi-IN' || v.lang === 'en-IN');
+    if (indianVoice) utterance.voice = indianVoice;
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
 }
+
+// --- EVENT LISTENERS (Keep these OUTSIDE the speak function) ---
+
+// 1. Press 'c' to close the modal
+// --- NEW COMBINED EVENT LISTENER ---
+// --- SIMPLIFIED KEY LISTENER (No Distance Check) ---
+document.addEventListener('keydown', (event) => {
+    
+    // 1. Press 'C' to close modal
+    if (event.key === 'c' || event.key === 'C') {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal();
+        }
+    }
+
+    // 2. Press 'E' to Enter Diwakar Mandir (WORKS ANYWHERE)
+    if ( event.key === 'E') {
+        console.log("E pressed! Attempting to teleport...");
+        
+        // This command switches the page. 
+        // MAKE SURE 'diwakar_interior.html' is the exact name of your file.
+        window.location.href = 'diwakar_interior.html';
+    }
+});
+
+// 2. Click to lock controls (re-enter the game)
+document.addEventListener('click', () => {
+    // Only lock if the modal is NOT open
+    const infoModal = document.getElementById('info-modal');
+    // Check if controls exists and if modal is hidden (or doesn't exist)
+    if (typeof controls !== 'undefined' && !controls.isLocked) {
+         if (!infoModal || infoModal.style.display === 'none') {
+             controls.lock();
+         }
+    }
+});
+window.closeModal = function() {
+    const modal = document.getElementById('info-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    // Force the game to take control again
+    if (typeof controls !== 'undefined') {
+        controls.lock(); 
+    }
+    
+    console.log("Escape or Close triggered: Window hidden.");
+};
 
 // --- 1. CORE SETUP ---
 const scene = new THREE.Scene();
@@ -85,8 +139,10 @@ overlay.addEventListener("click", () => controls.lock());
   
 
 // --- 3. ENVIRONMENT & ROADS ---
-const roadMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
-const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+
+// 1. CHANGE ROAD COLORS HERE (Was 0x444444)
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a }); 
+const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
 
 const extendedMainRoad = new THREE.Mesh(new THREE.PlaneGeometry(20, 2000), roadMaterial);
 extendedMainRoad.rotation.x = -Math.PI / 2;
@@ -123,7 +179,9 @@ roadNursingLeft.rotation.x = -Math.PI / 2;
 roadNursingLeft.position.set(-85, 0.06, 350);
 scene.add(roadNursingLeft);
 
-const greenFloor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x3a6b35 }));
+// 2. CHANGE FLOOR COLOR HERE (Was 0x3a6b35)
+// I changed it to 0x0f200f (Very dark green)
+const greenFloor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x0f200f }));
 greenFloor.rotation.x = -Math.PI / 2;
 scene.add(greenFloor);
 
@@ -173,22 +231,37 @@ function createHindiLabel(text) {
 // --- 5. BUILDINGS ---
 
 // MAIN GATE
-const gateGroup = new THREE.Group();
-const gateShape = new THREE.Shape();
-gateShape.moveTo(-15, 0); gateShape.lineTo(-15, 25); gateShape.lineTo(15, 25); gateShape.lineTo(15, 0);
-const gateHole = new THREE.Path();
-gateHole.moveTo(-8, 0); gateHole.lineTo(-8, 12); gateHole.quadraticCurveTo(0, 22, 8, 12); gateHole.lineTo(8, 0);
-gateShape.holes.push(gateHole);
-const gateArch = new THREE.Mesh(new THREE.ExtrudeGeometry(gateShape, { depth: 3, bevelEnabled: false }), new THREE.MeshStandardMaterial({ color: 0xfdf5e6 }));
-gateGroup.add(gateArch);
-const wallMat = new THREE.MeshStandardMaterial({ color: 0xeee8aa });
-const wallGeo = new THREE.BoxGeometry(200, 15, 2);
-const leftWall = new THREE.Mesh(wallGeo, wallMat); leftWall.position.set(-115, 7.5, 1.5); gateGroup.add(leftWall);
-const rightWall = new THREE.Mesh(wallGeo, wallMat); rightWall.position.set(115, 7.5, 1.5); gateGroup.add(rightWall);
-addLabel(gateGroup, "वनस्थली विद्यापीठ", 0, 20, 3.1, 0);
-gateGroup.position.set(0, 0, 700);
-scene.add(gateGroup);
+// MAIN GATE & SIDE WALLS
+      const gateGroup = new THREE.Group();
+      const gateShape = new THREE.Shape();
+      gateShape.moveTo(-15, 0);
+      gateShape.lineTo(-15, 25);
+      gateShape.lineTo(15, 25);
+      gateShape.lineTo(15, 0);
+      const gateHole = new THREE.Path();
+      gateHole.moveTo(-8, 0);
+      gateHole.lineTo(-8, 12);
+      gateHole.quadraticCurveTo(0, 22, 8, 12);
+      gateHole.lineTo(8, 0);
+      gateShape.holes.push(gateHole);
 
+      const gateArch = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(gateShape, { depth: 3, bevelEnabled: false }),
+        new THREE.MeshStandardMaterial({ color: 0x8e8b66 })
+      );
+      gateGroup.add(gateArch);
+
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x8e8b66 });
+      const wallGeo = new THREE.BoxGeometry(200, 15, 2);
+      const leftWall = new THREE.Mesh(wallGeo, wallMat);
+      leftWall.position.set(-115, 7.5, 1.5);
+      gateGroup.add(leftWall);
+      const rightWall = new THREE.Mesh(wallGeo, wallMat);
+      rightWall.position.set(115, 7.5, 1.5);
+      gateGroup.add(rightWall);
+      addLabel(gateGroup, "वनस्थली विद्यापीठ", 0, 20, 3.1, 0);
+      gateGroup.position.set(0, 0, 700);
+      scene.add(gateGroup);
 function createMainGateSign(x, z) {
     const signGroup = new THREE.Group();
     const legMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
@@ -234,19 +307,143 @@ addLabel(oppositeDept, "प्रज्ञा मन्दिर", 0, 38, 10.2, 
 
 // APAJI INSTITUTE
 const apaji = new THREE.Group();
-const apajiMat = new THREE.MeshStandardMaterial({ color: 0xeee8aa });
-const centerBlock = new THREE.Mesh(new THREE.BoxGeometry(40, 25, 20), apajiMat); centerBlock.position.y = 12.5; apaji.add(centerBlock);
-const leftWing = new THREE.Mesh(new THREE.BoxGeometry(20, 25, 40), apajiMat); leftWing.position.set(-30, 12.5, 0); apaji.add(leftWing);
-const rightWing = new THREE.Mesh(new THREE.BoxGeometry(20, 25, 40), apajiMat); rightWing.position.set(30, 12.5, 0); apaji.add(rightWing);
-const porch = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 8), new THREE.MeshStandardMaterial({ color: 0xffffff })); porch.position.set(0, 12, 12); apaji.add(porch);
-for (let row = 0; row < 3; row++) {
-  for (let col = -1; col <= 1; col++) {
-    const win = new THREE.Mesh(new THREE.PlaneGeometry(5, 4), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-    win.position.set(col * 12, 6 + row * 8, 10.1); apaji.add(win);
-  }
+      apaji.name = "apaji_building";
+      const apajiMat = new THREE.MeshStandardMaterial({ color: 0x8e8b66 });
+      const centerBlock = new THREE.Mesh(
+        new THREE.BoxGeometry(40, 25, 20),
+        apajiMat
+      );
+      centerBlock.position.y = 12.5;
+      apaji.add(centerBlock);
+      const leftWing = new THREE.Mesh(
+        new THREE.BoxGeometry(20, 25, 40),
+        apajiMat
+      );
+      leftWing.position.set(-30, 12.5, 0);
+      apaji.add(leftWing);
+      const rightWing = new THREE.Mesh(
+        new THREE.BoxGeometry(20, 25, 40),
+        apajiMat
+      );
+      rightWing.position.set(30, 12.5, 0);
+      apaji.add(rightWing);
+      const porch = new THREE.Mesh(
+        new THREE.BoxGeometry(12, 2, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+      );
+      porch.position.set(0, 12, 12);
+      apaji.add(porch);
+
+      for (let row = 0; row < 3; row++) {
+        for (let col = -1; col <= 1; col++) {
+          const win = new THREE.Mesh(
+            new THREE.PlaneGeometry(5, 4),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+          );
+          win.position.set(col * 12, 6 + row * 8, 10.1);
+          apaji.add(win);
+        }
+      }
+      apaji.rotation.y = -Math.PI / 2;
+      apaji.position.set(150, 0, -195);
+      scene.add(apaji); // Aligned with r2
+      addLabel(apaji, "अपाजी संस्थान", 0, 30, 10.5, 0);
+      // ... [Existing animate function ends here] ...
+
+        // ==========================================
+        // NEW INTERACTION CODE (The Binding)
+        // ==========================================
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // This detects the click
+        window.addEventListener('click', (event) => {
+            if (controls.isLocked) {
+                mouse.x = 0; 
+                mouse.y = 0;
+            } else {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            }
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                let isApaji = false;
+
+                // Check if the clicked part belongs to the Apaji building group
+                obj.traverseAncestors((ancestor) => {
+                    if (ancestor.name === "apaji_building") isApaji = true;
+                });
+                if (obj.name === "apaji_building") isApaji = true;
+
+                if (isApaji) {
+                    showApajiInfo();
+                }
+            }
+        });
+
+        // This opens the window
+        // This function must be attached to 'window' to be "seen" by the button
+        // This makes the function global so the HTML button 'onclick' can find it
+
+    // Also update your show function to ensure it unlocks the mouse
+    function showApajiInfo() {
+        const modal = document.getElementById('info-modal');
+        const content = document.getElementById('modal-content');
+        
+        content.innerText = "The Apaji Institute of Mathematics & Applied Computer Technology is one of the technology/engineering-focused units associated with Banasthali. It provides infrastructure like modern computer labs, servers, and high-speed internet for students and offers courses in tech and IT-related fields.";
+        
+        modal.style.display = 'block';
+        
+        // Voice feedback
+        speak("Opening Apaji Institute information.");
+        
+        // Unlock the mouse so the cursor appears for clicking
+        if (typeof controls !== 'undefined') {
+            controls.unlock();
+        }
+    }
+    // This listener waits for you to click the screen to start walking again
+    controls.addEventListener('lock', function () {
+        // Hide the overlay and the info-modal when you start walking
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('info-modal').style.display = 'none';
+    });
+
+    controls.addEventListener('unlock', function () {
+        // Show the overlay again if you aren't in a modal
+        const modal = document.getElementById('info-modal');
+        if (modal.style.display !== 'block') {
+            document.getElementById('overlay').style.display = 'block';
+        }
+    });
+    function animate() {
+    requestAnimationFrame(animate);
+
+    // Movement ONLY works when the mouse is locked (walking mode)
+    if (controls.isLocked) {
+        // Your movement logic (velocity/direction) goes here
+        updateMovement(); 
+    }
+
+    renderer.render(scene, camera);
 }
-apaji.rotation.y = -Math.PI / 2; apaji.position.set(150, 0, -195); scene.add(apaji);
-addLabel(apaji, "अपाजी संस्थान", 0, 30, 10.5, 0);
+   window.closeModal = function() {
+    const modal = document.getElementById('info-modal');
+    modal.style.display = 'none';
+    
+    // 1. Tell the browser to look at the main window again
+    window.focus(); 
+
+    // 2. Re-lock the mouse
+    if (controls) {
+        controls.lock(); 
+    }
+};
 
 // VANI MANDIR
 const vani = new THREE.Group();
@@ -468,7 +665,7 @@ function createDiwakarMandir() {
     const diwakar = new THREE.Group();
     diwakar.name = "Diwakar Mandir"; 
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const blueMat = new THREE.MeshStandardMaterial({ color: 0x5a9bd5 });
+    const blueMat = new THREE.MeshStandardMaterial({ color: 0x0e2f44 });
     const windowMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
     const centerBlock = new THREE.Mesh(new THREE.BoxGeometry(25, 30, 18), blueMat); centerBlock.position.y = 15; diwakar.add(centerBlock);
     const leftWing = new THREE.Mesh(new THREE.BoxGeometry(30, 25, 15), whiteMat); leftWing.position.set(-27, 12.5, -1); diwakar.add(leftWing);
@@ -792,7 +989,7 @@ function createBigVidulaMaidanFinal(x, z) {
     // 1. BASE (Main Ground Layer)
     const base = new THREE.Mesh(
         new THREE.PlaneGeometry(totalWidth, totalDepth), 
-        new THREE.MeshStandardMaterial({ color: 0xd2b48c }) // Skin/Sand color
+        new THREE.MeshStandardMaterial({ color: 0x90ee90 }) // Skin/Sand color
     );
     base.rotation.x = -Math.PI / 2;
     base.position.y = -0.1;
@@ -911,7 +1108,7 @@ createBigVidulaMaidanFinal(-400, -550);
 // PEETHAM HOSTEL
 function createPeethamHostel(x, z) {
     const peethamGroup = new THREE.Group();
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0xfdf5e6 }); const winMat = new THREE.MeshStandardMaterial({ color: 0x222222 }); const accentMat = new THREE.MeshStandardMaterial({ color: 0x800000 }); const doorMat = new THREE.MeshStandardMaterial({ color: 0x4b2d1f });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x8e8b66 }); const winMat = new THREE.MeshStandardMaterial({ color: 0x222222 }); const accentMat = new THREE.MeshStandardMaterial({ color: 0x800000 }); const doorMat = new THREE.MeshStandardMaterial({ color: 0x4b2d1f });
     const floorHeight = 12; const bWidth = 55; const bDepth = 25;
     for (let i = 0; i < 2; i++) {
         const floor = new THREE.Mesh(new THREE.BoxGeometry(bWidth, floorHeight, bDepth), wallMat); floor.position.y = (floorHeight / 2) + (i * floorHeight); peethamGroup.add(floor);
@@ -925,7 +1122,65 @@ function createPeethamHostel(x, z) {
 createPeethamHostel(-200, 80);
 
 // --- INTERACTION LOGIC ---
+function createChaitanyamHostel(x, z) {
+    const hostelGroup = new THREE.Group();
 
+    // 1. MAIN STRUCTURE (Big Hostel Building)
+    const buildingGeo = new THREE.BoxGeometry(60, 25, 30);
+    const buildingMat = new THREE.MeshStandardMaterial({ color: 0xFFF5E1 }); // Light Cream
+    const building = new THREE.Mesh(buildingGeo, buildingMat);
+    building.position.y = 12.5;
+    hostelGroup.add(building);
+
+    // 2. ENTRANCE GATE (Facing the Road/Atithi Bhawan)
+    const gateGeo = new THREE.BoxGeometry(10, 10, 2);
+    const gateMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+    const gate = new THREE.Mesh(gateGeo, gateMat);
+    // Road ki taraf face karne ke liye (Z-axis positive face par)
+    gate.position.set(0, 5, 15.1); 
+    hostelGroup.add(gate);
+
+    // 3. HINDI NAME PLATE (Label)
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1024; canvas.height = 256;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#800000'; // Dark Red
+    ctx.font = 'Bold 90px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('श्री शांता चैतन्यम्', 512, 160);
+
+    const labelTex = new THREE.CanvasTexture(canvas);
+    const label = new THREE.Mesh(
+        new THREE.PlaneGeometry(15, 4),
+        new THREE.MeshBasicMaterial({ map: labelTex, side: THREE.DoubleSide })
+    );
+    label.position.set(0, 13, 15.2);
+    hostelGroup.add(label);
+
+    // 4. WINDOWS (Hostel Look)
+    const winGeo = new THREE.PlaneGeometry(2, 3);
+    const winMat = new THREE.MeshStandardMaterial({ color: 0x8e8b66 });
+    for (let floor = 0; floor < 3; floor++) {
+        for (let side = -25; side <= 25; side += 8) {
+            if (Math.abs(side) < 6 && floor === 0) continue; // Skip door area
+            const win = new THREE.Mesh(winGeo, winMat);
+            win.position.set(side, 6 + (floor * 7), 15.1);
+            hostelGroup.add(win);
+        }
+    }
+
+    // --- PLACEMENT: EXACTLY OPPOSITE ATITHI BHAWAN ---
+    hostelGroup.position.set(x, 0, z);
+    // Atithi Bhawan -Math.PI/2 par hai, toh ise Math.PI/2 karenge taaki face aamne-samne ho
+    hostelGroup.rotation.y = Math.PI / 2; 
+
+    scene.add(hostelGroup);
+}
+
+// CALLING: Atithi Bhawan (100, 250) ke samne road ke uss paar (-100, 250)
+createChaitanyamHostel(-100, 250);
 
 const interacter = new THREE.Raycaster();
 const centerPoint = new THREE.Vector2(0, 0); 
@@ -956,88 +1211,129 @@ function updateInteraction() {
         hud.style.display = 'none';
     }
 }function updateHUD() {
-        const p = camera.position;
-        const t = document.getElementById("location-text");
-        let currentLocation = "";
-        let welcomeMsg = "";
+    const p = camera.position;
+    const t = document.getElementById("location-text");
+    let locEnglish = "";
+    let locHindi = "";
+    let welcomeMsg = "";
 
-        // 1. Mukhya Dwar (Start Area)
-        if (p.z > 680 && p.z < 760) {
-          currentLocation = "Mukhya Dwar";
-          welcomeMsg =
-            "Welcome to Mukhya Dwar, the Main Gate of Banasthali Vidyapith.";
-        }
-        // 2. Services (Left Side)
-        else if (p.z < 630 && p.z > 580 && p.x < -20) {
-          currentLocation = "Post Office";
-          welcomeMsg = "Welcome to the Post Office.";
-        } else if (p.z < 570 && p.z > 520 && p.x < -30) {
-          currentLocation = "SBI Bank";
-          welcomeMsg = "Welcome to State Bank of India and A T M facility.";
-        } else if (p.z < 490 && p.z > 450 && p.x < -40) {
-          currentLocation = "Krishi Vigyan Kendra";
-          welcomeMsg = "Welcome to Krishi Vigyan Kendra.";
-        } else if (p.z < 440 && p.z > 400 && p.x < -40) {
-          currentLocation = "Arogya Mandir";
-          welcomeMsg = "Welcome to Apaji Arogya Mandir hospital.";
-        }
-        // 3. Nursing Faculty (Right Side)
-        else if (p.z < 410 && p.z > 370 && p.x > 30) {
-          currentLocation = "Nursing Faculty";
-          welcomeMsg = "Welcome to the Faculty of Nursing.";
-        }
-        // 4. Mandirs (Right Side)
-        else if (p.z < 100 && p.z > -20 && p.x > 80) {
-          currentLocation = "Pragya Mandir";
-          welcomeMsg = "Welcome to Pragya Mandir.";
-        }
-        // 5. ICICI Junction (Left Side)
-        else if (p.z < -115 && p.z > -145 && p.x < -10 && p.x > -40) {
-          currentLocation = "ICICI ATM";
-          welcomeMsg = "Welcome to I C I C I Bank A T M.";
-        } else if (p.z < -115 && p.z > -145 && p.x < -50 && p.x > -80) {
-          currentLocation = "Rohit Juice Point";
-          welcomeMsg =
-            "Welcome to Rohit Greens and Juice Point. Orange juice is available for 50 rupees.";
-        } else if (p.z < -115 && p.z > -145 && p.x < -90) {
-          currentLocation = "Pooja Sports";
-          welcomeMsg =
-            "Welcome to Pooja Photocopy and Sports Wear, the official kit store.";
-        }
-        // 6. Deep Campus (Right Side)
-        else if (p.z < -170 && p.z > -215 && p.x > 80) {
-          currentLocation = "Apaji Institute";
-          welcomeMsg = "Welcome to Apaji Institute.";
-        } else if (p.z < -215 && p.z > -260 && p.x > 200) {
-          currentLocation = "Diwakar Mandir";
-          welcomeMsg = "Welcome to Diwakar Mandir.";
-        } else if (p.z < -340 && p.z > -400 && p.x > 100) {
-          currentLocation = "Vani Mandir";
-          welcomeMsg = "Welcome to Vani Mandir.";
+    // --- 1. DIWAKAR MANDIR (Super Sensitive & Priority) ---
+    // X > 60 matlab road se halka sa right mudte hi trigger hoga
+    // Z range ko -210 se -380 tak rakha hai (kaafi bada area)
+    if (p.x > 60 && p.z < -210 && p.z > -380) {
+        locEnglish = "Diwakar Mandir"; 
+        locHindi = "दिवाकर मन्दिर";
+        welcomeMsg = "Welcome to Diwakar Mandir.";
+    }
+
+    // --- 2. APAJI INSTITUTE (Ab iski range choti kar di hai) ---
+    // Iski Z range sirf -150 se -210 tak hai
+    else if (p.x > 60 && p.z < -140 && p.z >= -210) {
+        locEnglish = "Apaji Institute"; 
+        locHindi = "अपाजी संस्थान";
+        welcomeMsg = "Welcome to Apaji Institute.";
+    }
+
+    // --- 3. PRABHA MANDIR ---
+    else if (p.x > 70 && p.z < 30 && p.z > -40) {
+        locEnglish = "Prabha Mandir"; locHindi = "प्रभा मन्दिर";
+        welcomeMsg = "Welcome to Prabha Mandir.";
+    }
+
+    // --- 4. PRAGYA MANDIR ---
+    else if (p.x > 70 && p.z < 120 && p.z > 40) {
+        locEnglish = "Pragya Mandir"; locHindi = "प्रज्ञा मन्दिर";
+        welcomeMsg = "Welcome to Pragya Mandir.";
+    }
+
+    // --- 5. POST OFFICE ---
+    else if (p.x < -20 && p.z < 640 && p.z > 580) {
+        locEnglish = "Post Office"; locHindi = "डाकघर";
+        welcomeMsg = "Welcome to the Post Office.";
+    }
+
+    // --- 6. SBI BANK ---
+    else if (p.x < -20 && p.z < 580 && p.z > 520) {
+        locEnglish = "State Bank of India"; locHindi = "भारतीय स्टेट बैंक";
+        welcomeMsg = "Welcome to State Bank of India.";
+    }
+
+    // --- 7. AROGYA MANDIR ---
+    else if (p.x < -20 && p.z < 460 && p.z > 380) {
+        locEnglish = "Arogya Mandir"; locHindi = "आरोग्य मन्दिर";
+        welcomeMsg = "Welcome to Arogya Mandir.";
+    }
+
+    // --- 8. FACULTY OF NURSING ---
+    else if (p.x > 20 && p.x < 70 && p.z < 420 && p.z > 360) {
+        locEnglish = "Faculty of Nursing"; locHindi = "नरसिंग संकाय";
+        welcomeMsg = "Welcome to the Faculty of Nursing.";
+    }
+
+    // --- 9. ATITHI BHAWAN ---
+    else if (p.x > 20 && p.x < 70 && p.z < 310 && p.z > 190) {
+        locEnglish = "Atithi Bhawan (Guest House)"; locHindi = "अतिथि भवन";
+        welcomeMsg = "Welcome to Atithi Bhawan.";
+    }
+
+    // --- 10. SHANTA CHAITYAM HOSTEL ---
+    else if (p.x < -20 && p.z < 310 && p.z > 190) {
+        locEnglish = "Shree Shanta Chaitanyam Hostel"; locHindi = "श्री शांता चैतन्यम् छात्रावास";
+        welcomeMsg = "Welcome to Shree Shanta Chaitanyam Hostel.";
+    }
+
+    // --- 11. SHANTA SAUDH ---
+    else if (p.x < -20 && p.z < 30 && p.z > -70) {
+        locEnglish = "Shree Shanta Saudh"; locHindi = "श्री शांता सौध";
+        welcomeMsg = "Welcome to Shree Shanta Saudh.";
+    }
+
+    // --- 12. NEW MARKET ---
+    else if (p.x < -20 && p.z < -50 && p.z > -130) {
+        locEnglish = "New Market Shops"; locHindi = "न्यू मार्केट";
+        welcomeMsg = "Welcome to New Market here you can find daily useful things.";
+    }
+
+    // --- 13. MUKHYA DWAR ---
+    else if (Math.abs(p.x) < 40 && p.z > 680 && p.z < 780) {
+        locEnglish = "Mukhya Dwar"; locHindi = "मुख्य द्वार";
+        welcomeMsg = "Welcome to Mukhya Dwar of bansthali vidyapeeth.";
+    }
+
+    // --- 14. MAIN ROAD ---
+    else if (Math.abs(p.x) < 20) {
+        locEnglish = "Main Road"; locHindi = "मुख्य मार्ग";
+    }
+
+    // --- DEFAULT: BLANK ---
+    else {
+        locEnglish = ""; locHindi = "";
+    }
+
+    // --- RENDER HUD ---
+    if (t) {
+        if (locHindi === "") {
+            t.style.display = "none";
         } else {
-          currentLocation = "Main Road";
+            t.style.display = "block";
+            t.innerHTML = `
+                <div style="padding: 10px; line-height: 1.4;">
+                    <b style="color:white; font-size:1.3em; display:block; margin-bottom: 5px;">${locHindi}</b>
+                    <span style="color:white; font-size:1.1em; font-weight: 500;">${locEnglish}</span>
+                </div>`;
         }
+    }
 
-        // UPDATE UI
-        t.innerText =
-          currentLocation === "Main Road"
-            ? "Walking on Main Road..."
-            : "At " + currentLocation + "...";
+    // --- VOICE LOGIC ---
+    if (locEnglish !== "" && locEnglish !== "Main Road" && lastSpokenLocation !== locEnglish) {
+        speak(welcomeMsg);
+        lastSpokenLocation = locEnglish;
+    }
 
-        // TRIGGER VOICE
-        if (
-          currentLocation !== "Main Road" &&
-          lastSpokenLocation !== currentLocation
-        ) {
-          speak(welcomeMsg);
-          lastSpokenLocation = currentLocation;
-        }
-
-        // RESET STATE (Allows re-triggering when returning to a building)
-        if (currentLocation === "Main Road" && p.x > -15 && p.x < 15) {
-          lastSpokenLocation = "";
-        }
-      }
+    if (locEnglish === "Main Road") {
+        lastSpokenLocation = "";
+    }
+}
       // --- ROBOT & LOOP ---
       let robotCompanion;
       function createRobotCompanion() {
@@ -1060,14 +1356,110 @@ function updateInteraction() {
 
       const velocity = new THREE.Vector3();
       const direction = new THREE.Vector3();
+      async function initMetaverseAPI() {
+    const hud = document.getElementById("weather-hud");
+    const hudTemp = document.getElementById("hud-temp");
+    const hudDesc = document.getElementById("hud-desc");
+
+    // Show/Hide HUD based on PointerLock (stays in the corner of your screen)
+    controls.addEventListener('lock', () => { hud.style.display = 'block'; });
+    controls.addEventListener('unlock', () => { hud.style.display = 'none'; });
+
+    // --- BILLBOARD MESH CODE REMOVED FROM HERE ---
+
+    // 1. Fetch API Data
+    try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=26.4063&longitude=75.8715&current_weather=true');
+        const data = await response.json();
+        const temp = Math.round(data.current_weather.temperature);
+        const code = data.current_weather.weathercode;
+
+        // 2. Update the Bottom-Left HUD only
+        hudTemp.innerText = `${temp}°C`;
+        hudDesc.innerText = code > 3 ? "Cloudy / Overcast" : "Clear Skies";
+
+        // --- CANVAS TEXTURE CODE REMOVED FROM HERE ---
+
+        // 3. Sync Environment (Fog/Sky)
+        if (code > 3 && scene.fog) {
+            scene.fog.color.setHex(0x999999);
+            scene.background.setHex(0x228b22);
+        }
+
+    } catch (err) {
+        hudDesc.innerText = "Offline Mode";
+        console.error("API Connection Failed", err);
+    }
+}
+async function initMetaverseAPI() {
+    const hud = document.getElementById("weather-hud");
+    const hudTemp = document.getElementById("hud-temp");
+    const hudDesc = document.getElementById("hud-desc");
+
+    // Show/Hide HUD based on PointerLock (only show when playing)
+    controls.addEventListener('lock', () => { hud.style.display = 'block'; });
+    controls.addEventListener('unlock', () => { hud.style.display = 'none'; });
+
+    // 1. Create the 3D Billboard Mesh in the world
+    const boardGroup = new THREE.Group();
+    const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(0, 0, 0),
+        new THREE.MeshStandardMaterial({ color: 0x222222 })
+    );
+    const screen = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 10),
+        new THREE.MeshBasicMaterial({ color: 0x000000 })
+    );
+    screen.position.z = 0.51;
+    screen.name = "WorldWeatherScreen"; // ID for later update
+    boardGroup.add(frame, screen);
+    boardGroup.position.set(30, 6, 650); // Near Main Gate
+    scene.add(boardGroup);
+
+    // 2. Fetch API Data & Update Visuals
+    try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=26.4063&longitude=75.8715&current_weather=true');
+        const data = await response.json();
+        const temp = Math.round(data.current_weather.temperature);
+        const code = data.current_weather.weathercode;
+
+        // Update Top-Left HUD
+        hudTemp.innerText = `${temp}°C`;
+        hudDesc.innerText = code > 3 ? "Cloudy / Overcast" : "Clear Skies";
+
+        
+        ctx.fillStyle = "#800000"; ctx.fillRect(0, 0, 512, 256);
+        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.textAlign = "center";
+        ctx.fillText("BANASTHALI TEMP", 256, 80);
+        ctx.fillStyle = "white"; ctx.font = "bold 100px Arial";
+        ctx.fillText(`${temp}°C`, 256, 190);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        screen.material.map = texture;
+        screen.material.needsUpdate = true;
+
+        // Sync Environment (Fog/Sky)
+        if (code > 3) {
+            scene.fog.color.setHex(0x546e7a);
+            scene.background.setHex(0x546e7a);
+        }
+
+    } catch (err) {
+        hudDesc.innerText = "Banasthali VIdayapith";
+        console.error("API Connection Failed", err);
+    }
+}
+
+// CALL THIS AT THE END OF YOUR SCRIPT
+initMetaverseAPI();
 function animate() {
         requestAnimationFrame(animate);
 
         if (controls.isLocked) {
           const delta = 0.016;
 
-          velocity.x -= velocity.x * 10.0 * delta;
-          velocity.z -= velocity.z * 10.0 * delta;
+          velocity.x -= velocity.x * 50.0 * delta;
+          velocity.z -= velocity.z * 50.0 * delta;
 
           direction.z =
             Number(keys["KeyW"] || false) - Number(keys["KeyS"] || false);
@@ -1075,7 +1467,7 @@ function animate() {
             Number(keys["KeyD"] || false) - Number(keys["KeyA"] || false);
           direction.normalize();
 
-          const walkSpeed = 200.0;
+          const walkSpeed = 2000.0;
           if (keys["KeyW"] || keys["KeyS"])
             velocity.z -= direction.z * walkSpeed * delta;
           if (keys["KeyA"] || keys["KeyD"])
