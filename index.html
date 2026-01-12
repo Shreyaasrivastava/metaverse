@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Banasthali Vidyapith Metaverse</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="overlay">
+      <h1>Banasthali Vidyapith Metaverse</h1>
+      <p>CLICK TO START EXPLORING</p>
+      <p style="font-size: 0.9em; color: #aaa">
+        W, A, S, D to Walk | Mouse to Look | ESC to Exit
+      </p>
+    </div>
+
+   <div id="hud">
+      <div id="chat-container">
+        <div id="chat-header">
+          <span>🤖 Banasthali AI Guide</span>
+          <button onclick="controls.lock()" id="close-chat">×</button>
+        </div>
+
+        <div id="chat-history">
+          <div class="ai-welcome">
+            <b>AI:</b> Namaste! I am your campus assistant. Press
+            <kbd>C</kbd> or <kbd>Enter</kbd> to talk to me!
+          </div>
+        </div>
+
+        <div id="chat-input-container">
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Type your question..."
+          />
+        </div>
+      </div> 
+      <b>📍 Campus Tour</b><br />
+      <small id="location-text">Starting at Mukhya Dwar...</small><br />
+      <small>Press <kbd>ESC</kbd> to release mouse</small>
+    </div>
+    
+    <div id="hud-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.7); padding: 10px; display: none; pointer-events: none;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+    <script src="main.js"></script>
+  </body>
+</html>
