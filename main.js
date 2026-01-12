@@ -52,13 +52,22 @@ let lastSpokenLocation = "";
 
 
 function speak(text) {
+    // 1. Purani speech ko turant band karein
     window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
-    const indianVoice = voices.find(v => v.lang === 'hi-IN' || v.lang === 'en-IN');
-    if (indianVoice) utterance.voice = indianVoice;
-    utterance.rate = 0.9;
-    utterance.pitch = 1.5;
+    
+    // Hindi-India ya English-India voice dhoondhein
+    const preferredVoice = voices.find(v => v.lang === 'hi-IN') || 
+                           voices.find(v => v.lang === 'en-IN');
+
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.rate = 0.9;  // Normal se thoda slow
+    utterance.pitch = 1.0; 
+    utterance.volume = 1.0; 
+
     window.speechSynthesis.speak(utterance);
 }
 
@@ -755,7 +764,7 @@ function createDiwakarMandir() {
     const rightWing = new THREE.Mesh(new THREE.BoxGeometry(30, 25, 15), whiteMat); rightWing.position.set(27, 12.5, -1); diwakar.add(rightWing);
     const entrance = new THREE.Mesh(new THREE.PlaneGeometry(12, 18), windowMat); entrance.position.set(0, 10, 9.1); diwakar.add(entrance);
     for (let side = -1; side <= 1; side += 2) { for (let row = 0; row < 2; row++) { for (let col = 0; col < 2; col++) { const win = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), windowMat); win.position.set(side * (20 + col * 12), 8 + row * 10, 6.6); diwakar.add(win); } } }
-    diwakar.rotation.y = 0; diwakar.position.set(350, 0, -230); scene.add(diwakar);
+    diwakar.rotation.y = 0; diwakar.position.set(350, 0, -220); scene.add(diwakar);
     addLabel(diwakar, "दिवाकर मन्दिर", 0, 35, 9.2, 0);
 }
 createDiwakarMandir();
@@ -1332,97 +1341,125 @@ function updateInteraction() {
     } else {
         hud.style.display = 'none';
     }
-}function updateHUD() {
+}
+function updateHUD() {
     const p = camera.position;
     const t = document.getElementById("location-text");
     let locEnglish = "";
     let locHindi = "";
     let welcomeMsg = "";
 
-    // --- 1. DIWAKAR MANDIR (Super Sensitive & Priority) ---
-    // X > 60 matlab road se halka sa right mudte hi trigger hoga
-    // Z range ko -210 se -380 tak rakha hai (kaafi bada area)
-    if (p.x > 60 && p.z < -210 && p.z > -380) {
+    // --- 1. DIWAKAR MANDIR (New Location: 350, 0, -220) ---
+    // Jab user X > 250 aur Z range -180 se -260 ke beech ho
+    if (p.x > 250 && p.z < -180 && p.z > -260) {
         locEnglish = "Diwakar Mandir"; 
         locHindi = "दिवाकर मन्दिर";
         welcomeMsg = "Welcome to Diwakar Mandir.";
     }
 
-    // --- 2. APAJI INSTITUTE (Ab iski range choti kar di hai) ---
-    // Iski Z range sirf -150 se -210 tak hai
-    else if (p.x > 60 && p.z < -140 && p.z >= -210) {
+    // --- 2. VANI MANDIR (Position: 150, 0, -370) ---
+    else if (p.x > 100 && p.z < -340 && p.z > -400) {
+        locEnglish = "Vani Mandir"; 
+        locHindi = "वाणी मन्दिर";
+        welcomeMsg = "Welcome to Vani Mandir.";
+    }
+
+    // --- 3. APAJI INSTITUTE (X is around 120-150) ---
+    // Iski range restricted rakhi hai taaki Diwakar se na takraye
+    else if (p.x > 80 && p.x < 220 && p.z < -140 && p.z > -210) {
         locEnglish = "Apaji Institute"; 
         locHindi = "अपाजी संस्थान";
         welcomeMsg = "Welcome to Apaji Institute.";
     }
 
-    // --- 3. PRABHA MANDIR ---
+    // --- 4. SHANTA SADAM (-150, -20) ---
+    else if (p.x < -100 && p.z < 20 && p.z > -60) {
+        locEnglish = "Shree Shanta Sadam"; 
+        locHindi = "श्री शांता सदम";
+        welcomeMsg = "Welcome to Shree Shanta Sadam.";
+    }
+
+    // --- 5. PEETHAM HOSTEL (-200, 80) ---
+    else if (p.x < -150 && p.z < 120 && p.z > 40) {
+        locEnglish = "Peetham Hostel"; 
+        locHindi = "पीठम छात्रावास";
+        welcomeMsg = "Welcome to Peetham Hostel.";
+    }
+
+    // --- 6. KRISHI VIGYAN KENDRA (-70, 470) ---
+    else if (p.x < -40 && p.z < 500 && p.z > 440) {
+        locEnglish = "Krishi Vigyan Kendra"; 
+        locHindi = "कृषि विज्ञान केंद्र";
+        welcomeMsg = "Welcome to Krishi Vigyan Kendra.";
+    }
+
+    // --- 7. PRABHA MANDIR ---
     else if (p.x > 70 && p.z < 30 && p.z > -40) {
         locEnglish = "Prabha Mandir"; locHindi = "प्रभा मन्दिर";
         welcomeMsg = "Welcome to Prabha Mandir.";
     }
 
-    // --- 4. PRAGYA MANDIR ---
+    // --- 8. PRAGYA MANDIR ---
     else if (p.x > 70 && p.z < 120 && p.z > 40) {
         locEnglish = "Pragya Mandir"; locHindi = "प्रज्ञा मन्दिर";
         welcomeMsg = "Welcome to Pragya Mandir.";
     }
 
-    // --- 5. POST OFFICE ---
+    // --- 9. POST OFFICE ---
     else if (p.x < -20 && p.z < 640 && p.z > 580) {
         locEnglish = "Post Office"; locHindi = "डाकघर";
         welcomeMsg = "Welcome to the Post Office.";
     }
 
-    // --- 6. SBI BANK ---
+    // --- 10. SBI BANK ---
     else if (p.x < -20 && p.z < 580 && p.z > 520) {
         locEnglish = "State Bank of India"; locHindi = "भारतीय स्टेट बैंक";
         welcomeMsg = "Welcome to State Bank of India.";
     }
 
-    // --- 7. AROGYA MANDIR ---
+    // --- 11. AROGYA MANDIR ---
     else if (p.x < -20 && p.z < 460 && p.z > 380) {
         locEnglish = "Arogya Mandir"; locHindi = "आरोग्य मन्दिर";
         welcomeMsg = "Welcome to Arogya Mandir.";
     }
 
-    // --- 8. FACULTY OF NURSING ---
+    // --- 12. FACULTY OF NURSING ---
     else if (p.x > 20 && p.x < 70 && p.z < 420 && p.z > 360) {
         locEnglish = "Faculty of Nursing"; locHindi = "नरसिंग संकाय";
         welcomeMsg = "Welcome to the Faculty of Nursing.";
     }
 
-    // --- 9. ATITHI BHAWAN ---
+    // --- 13. ATITHI BHAWAN ---
     else if (p.x > 20 && p.x < 70 && p.z < 310 && p.z > 190) {
-        locEnglish = "Atithi Bhawan (Guest House)"; locHindi = "अतिथि भवन";
+        locEnglish = "Atithi Bhawan"; locHindi = "अतिथि भवन";
         welcomeMsg = "Welcome to Atithi Bhawan.";
     }
 
-    // --- 10. SHANTA CHAITYAM HOSTEL ---
+    // --- 14. SHANTA CHAITYAM HOSTEL ---
     else if (p.x < -20 && p.z < 310 && p.z > 190) {
         locEnglish = "Shree Shanta Chaitanyam Hostel"; locHindi = "श्री शांता चैतन्यम् छात्रावास";
         welcomeMsg = "Welcome to Shree Shanta Chaitanyam Hostel.";
     }
 
-    // --- 11. SHANTA SAUDH ---
+    // --- 15. SHANTA SAUDH ---
     else if (p.x < -20 && p.z < 30 && p.z > -70) {
         locEnglish = "Shree Shanta Saudh"; locHindi = "श्री शांता सौध";
         welcomeMsg = "Welcome to Shree Shanta Saudh.";
     }
 
-    // --- 12. NEW MARKET ---
+    // --- 16. NEW MARKET ---
     else if (p.x < -20 && p.z < -50 && p.z > -130) {
         locEnglish = "New Market Shops"; locHindi = "न्यू मार्केट";
-        welcomeMsg = "Welcome to New Market here you can find daily useful things.";
+        welcomeMsg = "Welcome to New Market.";
     }
 
-    // --- 13. MUKHYA DWAR ---
+    // --- 17. MUKHYA DWAR ---
     else if (Math.abs(p.x) < 40 && p.z > 680 && p.z < 780) {
         locEnglish = "Mukhya Dwar"; locHindi = "मुख्य द्वार";
-        welcomeMsg = "Welcome to Mukhya Dwar of bansthali vidyapeeth.";
+        welcomeMsg = "Welcome to Mukhya Dwar.";
     }
 
-    // --- 14. MAIN ROAD ---
+    // --- 18. MAIN ROAD ---
     else if (Math.abs(p.x) < 20) {
         locEnglish = "Main Road"; locHindi = "मुख्य मार्ग";
     }
@@ -1439,9 +1476,9 @@ function updateInteraction() {
         } else {
             t.style.display = "block";
             t.innerHTML = `
-                <div style="padding: 10px; line-height: 1.4;">
-                    <b style="color:white; font-size:1.3em; display:block; margin-bottom: 5px;">${locHindi}</b>
-                    <span style="color:white; font-size:1.1em; font-weight: 500;">${locEnglish}</span>
+                <div style="padding: 10px; line-height: 1.4; background: rgba(0,0,0,0.7); border-radius: 10px; border: 1px solid #00ffcc;">
+                    <b style="color:#00ffcc; font-size:1.3em; display:block; margin-bottom: 5px;">${locHindi}</b>
+                    <span style="color:white; font-size:1.1em;">${locEnglish}</span>
                 </div>`;
         }
     }
@@ -1451,10 +1488,7 @@ function updateInteraction() {
         speak(welcomeMsg);
         lastSpokenLocation = locEnglish;
     }
-
-    if (locEnglish === "Main Road") {
-        lastSpokenLocation = "";
-    }
+    if (locEnglish === "Main Road") lastSpokenLocation = "";
 }
       // --- ROBOT & LOOP ---
       let robotCompanion;
@@ -1514,66 +1548,255 @@ function updateInteraction() {
     }
 }
 async function initMetaverseAPI() {
+    // 1. HUD Elements
     const hud = document.getElementById("weather-hud");
     const hudTemp = document.getElementById("hud-temp");
     const hudDesc = document.getElementById("hud-desc");
 
-    // Show/Hide HUD based on PointerLock (only show when playing)
-    controls.addEventListener('lock', () => { hud.style.display = 'block'; });
-    controls.addEventListener('unlock', () => { hud.style.display = 'none'; });
+    // Show/Hide HUD based on PointerLock
+    if (typeof controls !== 'undefined') {
+        controls.addEventListener('lock', () => { hud.style.display = 'block'; });
+        controls.addEventListener('unlock', () => { hud.style.display = 'none'; });
+    }
 
-    // 1. Create the 3D Billboard Mesh in the world
+    // 2. Setup Canvas for 3D Billboard
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+
+    // 3. Create the 3D Billboard Mesh
     const boardGroup = new THREE.Group();
+    
+    // Frame (Changed from 0,0,0 to actual dimensions)
     const frame = new THREE.Mesh(
-        new THREE.BoxGeometry(0, 0, 0),
+        new THREE.BoxGeometry(21, 11, 1),
         new THREE.MeshStandardMaterial({ color: 0x222222 })
     );
+
     const screen = new THREE.Mesh(
         new THREE.PlaneGeometry(20, 10),
-        new THREE.MeshBasicMaterial({ color: 0x000000 })
+        new THREE.MeshBasicMaterial({ color: 0xffffff }) // Base color
     );
+    
     screen.position.z = 0.51;
-    screen.name = "WorldWeatherScreen"; // ID for later update
+    screen.name = "WorldWeatherScreen"; 
     boardGroup.add(frame, screen);
-    boardGroup.position.set(30, 6, 650); // Near Main Gate
+    boardGroup.position.set(30, 6, 650); 
     scene.add(boardGroup);
 
-    // 2. Fetch API Data & Update Visuals
+    // 4. Fetch API Data & Update Visuals
     try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=26.4063&longitude=75.8715&current_weather=true');
         const data = await response.json();
         const temp = Math.round(data.current_weather.temperature);
         const code = data.current_weather.weathercode;
 
-        // Update Top-Left HUD
-        hudTemp.innerText = `${temp}°C`;
-        hudDesc.innerText = code > 3 ? "Cloudy / Overcast" : "Clear Skies";
+        // Update DOM HUD
+        if(hudTemp) hudTemp.innerText = `${temp}°C`;
+        if(hudDesc) hudDesc.innerText = code > 3 ? "Cloudy / Overcast" : "Clear Skies";
 
+        // Draw to Canvas
+        ctx.fillStyle = "#800000"; // Maroon background
+        ctx.fillRect(0, 0, 512, 256);
         
-        ctx.fillStyle = "#800000"; ctx.fillRect(0, 0, 512, 256);
-        ctx.fillStyle = "#ffd700"; ctx.font = "bold 40px Arial"; ctx.textAlign = "center";
+        ctx.fillStyle = "#ffd700"; // Gold text
+        ctx.font = "bold 40px Arial"; 
+        ctx.textAlign = "center";
         ctx.fillText("BANASTHALI TEMP", 256, 80);
-        ctx.fillStyle = "white"; ctx.font = "bold 100px Arial";
+        
+        ctx.fillStyle = "white"; 
+        ctx.font = "bold 100px Arial";
         ctx.fillText(`${temp}°C`, 256, 190);
 
+        // Update Three.js Texture
         const texture = new THREE.CanvasTexture(canvas);
+        texture.anisotropy = 16; // Keeps text sharp at angles
         screen.material.map = texture;
         screen.material.needsUpdate = true;
 
         // Sync Environment (Fog/Sky)
-        if (code > 3) {
+        if (code > 3 && scene.fog) {
             scene.fog.color.setHex(0x546e7a);
             scene.background.setHex(0x546e7a);
         }
 
     } catch (err) {
-        hudDesc.innerText = "Banasthali VIdayapith";
+        if(hudDesc) hudDesc.innerText = "Banasthali Vidyapith";
         console.error("API Connection Failed", err);
+        
+        // Fallback display on billboard
+        ctx.fillStyle = "#333";
+        ctx.fillRect(0, 0, 512, 256);
+        ctx.fillStyle = "white";
+        ctx.font = "30px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Weather Offline", 256, 140);
+        screen.material.map = new THREE.CanvasTexture(canvas);
     }
 }
-
 // CALL THIS AT THE END OF YOUR SCRIPT
 initMetaverseAPI();
+function checkProximity() {
+    const popup = document.getElementById('alumni-popup');
+    if (!popup) return; // Safety check
+
+    // Apaji Department coordinates from your previous code
+    const apajiPos = new THREE.Vector3(150, 0, -195);
+    const distance = camera.position.distanceTo(apajiPos);
+
+    // If within 45 units, show the popup
+    if (distance < 45) {
+        if (popup.style.display === 'none') {
+            popup.style.display = 'block';
+            // Optional: unlock cursor so they can click 'Close'
+            // controls.unlock(); 
+        }
+    } else {
+        popup.style.display = 'none';
+    }
+}
+(function() {
+    window.isMapOpen = false;
+    window.navMode = "";
+    window.isWalking = false;
+
+    // --- FINAL RE-CALIBRATED COORDINATES ---
+    const locs = {
+        'MukhyaDwar': { x: 0, y: 5, z: 700, look: { x: 0, y: 5, z: 740 } },
+        
+        // Departments (Main Road)
+        'PostOffice': { x: -10, y: 5, z: 610, look: { x: -35, y: 5, z: 610 } },
+        'SBI':        { x: -20, y: 5, z: 550, look: { x: -50, y: 5, z: 550 } },
+        'Hospital':   { x: -30, y: 5, z: 420, look: { x: -60, y: 5, z: 420 } },
+        'Nursing':    { x: 20, y: 5, z: 390, look: { x: 50, y: 5, z: 390 } },
+        
+        // FIXED: Apaji & Vani Mandir (Standing on the right side road facing the entrance)
+        'Apaji':      { x: 195, y: 10, z: -195, look: { x: 150, y: 10, z: -195 } },
+        'VaniMandir': { x: 210, y: 12, z: -370, look: { x: 150, y: 12, z: -370 } },
+        'Diwakar':    { x: 350, y: 10, z: -180, look: { x: 350, y: 10, z: -220 } },
+        
+        // Market & ATMs
+        'NewMarket':  { x: -20, y: 5, z: -130, look: { x: -50, y: 5, z: -130 } }, 
+        'ICICIATM':   { x: 10, y: 5, z: -130, look: { x: -25, y: 5, z: -130 } },
+        
+        // Hostels
+        'Saudh':      { x: -40, y: 5, z: -20, look: { x: -80, y: 5, z: -20 } },
+        'Sadam':      { x: -110, y: 5, z: 40, look: { x: -155, y: 5, z: 40 } },
+        'Peetham':    { x: -160, y: 5, z: 130, look: { x: -205, y: 5, z: 130 } },
+        'Chaitanyam': { x: -50, y: 5, z: 250, look: { x: -95, y: 5, z: 250 } }
+    };
+
+    const menuHTML = `
+    <div id="nav-launcher" onclick="window.toggleMiniMap()" style="position:fixed; right:20px; bottom:40px; z-index:10000; cursor:pointer; background:#111; border:2px solid #00ffcc; border-radius:50%; width:65px; height:65px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px #00ffcc;">
+        <span style="font-size:30px;">📍</span>
+    </div>
+
+    <div id="main-tele-panel" style="position:fixed; right:-350px; top:50%; transform:translateY(-50%); background:rgba(10, 10, 10, 0.98); width:270px; padding:20px; border:2px solid #00ffcc; border-radius:20px 0 0 20px; color:white; font-family:sans-serif; z-index:9999; transition:0.4s; box-shadow:-10px 0 30px rgba(0,0,0,0.8);">
+        <h3 style="text-align:center; color:#00ffcc; margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">CAMPUS GUIDE</h3>
+        
+        <div id="v-modes" style="display:flex; flex-direction:column; gap:12px;">
+            <button class="nav-btn-main" onclick="window.hSelect('MukhyaDwar')">🏠 Main Entrance</button>
+            <button class="nav-btn-main" onclick="window.openSub('direct')">⚡ Instant Jump</button>
+            <button class="nav-btn-main" onclick="window.openSub('walk')">🛤️ Auto Walk to Gate</button>
+        </div>
+
+        <div id="v-depts" style="display:none; flex-direction:column; gap:8px;">
+            <span onclick="window.backToMain()" style="color:#00ffcc; cursor:pointer; font-weight:bold; font-size:12px;">← MODES</span>
+            <button class="nav-btn-sub" onclick="window.hSelect('PostOffice')">Post Office</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('SBI')">SBI Bank & ATM</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Hospital')">Arogya Mandir</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Nursing')">Nursing Faculty</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Apaji')">Apaji Institute</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Diwakar')">Diwakar Mandir</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('VaniMandir')">Vani Mandir</button>
+            <button class="nav-btn-sub" style="color:#00ffcc; border-color:#00ffcc;" onclick="window.hSelect('NewMarket')">🛒 New Market</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('ICICIATM')">🏧 ICICI ATM</button>
+            <button class="nav-btn-main" style="border-color:#ff9900; color:#ff9900; margin-top:5px;" onclick="window.openHostels()">🏢 HOSTELS LIST →</button>
+        </div>
+
+        <div id="v-hostels" style="display:none; flex-direction:column; gap:8px;">
+            <span onclick="window.openSub(window.navMode)" style="color:#ff9900; cursor:pointer; font-weight:bold; font-size:12px;">← DEPARTMENTS</span>
+            <button class="nav-btn-sub" onclick="window.hSelect('Saudh')">Shanta Saudh</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Sadam')">Shanta Sadam</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Peetham')">Peetham Hostel</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Chaitanyam')">Shanta Chaitanyam</button>
+        </div>
+    </div>
+
+    <style>
+        .nav-btn-main { background:#000; color:#00ffcc; border:1px solid #00ffcc; padding:12px; cursor:pointer; border-radius:8px; font-weight:bold; width:100%; transition:0.2s; }
+        .nav-btn-sub { background:#1a1a1a; color:white; border:1px solid #444; padding:9px; cursor:pointer; border-radius:5px; text-align:left; font-size:13px; width:100%; }
+        .nav-btn-sub:hover { border-color:#00ffcc; background:#222; transform: translateX(5px); }
+        .nav-btn-main:hover { background:#00ffcc; color:#000; box-shadow:0 0 10px #00ffcc; }
+    </style>`;
+    
+    document.body.insertAdjacentHTML('beforeend', menuHTML);
+
+    window.toggleMiniMap = function() {
+        const panel = document.getElementById('main-tele-panel');
+        window.isMapOpen = !window.isMapOpen;
+        if (window.isMapOpen) {
+            panel.style.right = "0px";
+            if (document.exitPointerLock) document.exitPointerLock();
+        } else {
+            panel.style.right = "-350px";
+            setTimeout(window.backToMain, 300);
+        }
+    };
+
+    window.openSub = (m) => {
+        window.navMode = m;
+        document.getElementById('v-modes').style.display = 'none';
+        document.getElementById('v-hostels').style.display = 'none';
+        document.getElementById('v-depts').style.display = 'flex';
+    };
+
+    window.openHostels = () => {
+        document.getElementById('v-depts').style.display = 'none';
+        document.getElementById('v-hostels').style.display = 'flex';
+    };
+
+    window.backToMain = () => {
+        document.getElementById('v-modes').style.display = 'flex';
+        document.getElementById('v-depts').style.display = 'none';
+        document.getElementById('v-hostels').style.display = 'none';
+    };
+
+    window.hSelect = function(key) {
+        window.toggleMiniMap();
+        if (typeof camera === 'undefined') return;
+
+        const t = locs[key];
+        const lookTarget = new THREE.Vector3(t.look.x, t.look.y, t.look.z);
+
+        if (window.navMode === 'direct' || key === 'MukhyaDwar') {
+            camera.position.set(t.x, t.y, t.z);
+            camera.lookAt(lookTarget);
+        } else {
+            if (window.isWalking) return;
+            window.isWalking = true;
+            const start = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+            let p = 0;
+            const walk = setInterval(() => {
+                p += 0.01; // Speed
+                if (p >= 1) { 
+                    clearInterval(walk); 
+                    window.isWalking = false; 
+                    camera.position.set(t.x, t.y, t.z);
+                    camera.lookAt(lookTarget);
+                    return; 
+                }
+                camera.position.x = start.x + (t.x - start.x) * p;
+                camera.position.y = start.y + (t.y - start.y) * p;
+                camera.position.z = start.z + (t.z - start.z) * p;
+                camera.lookAt(lookTarget);
+            }, 16);
+        }
+    };
+
+    window.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'm') window.toggleMiniMap(); });
+})();
 function animate() {
         requestAnimationFrame(animate);
 
@@ -1607,6 +1830,7 @@ function animate() {
             robotCompanion.position.lerp(targetPos, 0.1);
           }
           updateHUD();
+          checkProximity();
         }
         renderer.render(scene, camera);
       }

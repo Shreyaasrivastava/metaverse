@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI("AIzaSyCWH4Y6YWXyLR9_PvoBx_9t8ANIHw5MTmw");
+const genAI = new GoogleGenerativeAI("your key");
 
 app.post("/chat", async (req, res) => {
   // Use the standard stable identifiers

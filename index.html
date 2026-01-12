@@ -18,6 +18,21 @@
         <div id="hud-temp">--°C</div>
         <div id="hud-desc">Syncing Atmosphere...</div>
     </div>
+<div id="alumni-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 2000; text-align: center; width: 320px; border-top: 8px solid #a52a2a; color: black;">
+    
+    <h2 style="color: #a52a2a; margin-bottom: 15px;">Distinguished Alumni</h2>
+    
+    <div id="alumni-content">
+        <img src="avni_chaturvedi.jpg" alt="Avni Chaturvedi" style="width: 100%; border-radius: 10px; margin-bottom: 10px;">
+        <h3 style="margin: 5px 0;">Flt Lt Avni Chaturvedi</h3>
+        <p style="font-size: 14px; color: #444; background: #f9f9f9; padding: 10px; border-radius: 5px; text-align: left;">
+            <strong>Batch:</strong> 2014 (B.Tech CS)<br>
+            <strong>Achievement:</strong> First Indian woman to fly a fighter aircraft solo (MiG-21 Bison).
+        </p>
+    </div>
+
+    <button onclick="document.getElementById('alumni-popup').style.display='none'" style="margin-top: 15px; padding: 10px 20px; background: #a52a2a; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+</div>
 
    <div id="hud">
       <div id="chat-container">
@@ -55,7 +70,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-
+      
     <script src="main.js"></script>
   </body>
 </html>
