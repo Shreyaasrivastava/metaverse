@@ -58,7 +58,7 @@ function speak(text) {
     const indianVoice = voices.find(v => v.lang === 'hi-IN' || v.lang === 'en-IN');
     if (indianVoice) utterance.voice = indianVoice;
     utterance.rate = 0.9;
-    utterance.pitch = 1.0;
+    utterance.pitch = 1.5;
     window.speechSynthesis.speak(utterance);
 }
 
@@ -358,34 +358,40 @@ const apaji = new THREE.Group();
         const mouse = new THREE.Vector2();
 
         // This detects the click
-        window.addEventListener('click', (event) => {
-            if (controls.isLocked) {
-                mouse.x = 0; 
-                mouse.y = 0;
-            } else {
-                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            }
+       window.addEventListener('click', (event) => {
+    // 1. Setup mouse coordinates
+    if (controls.isLocked) {
+        mouse.x = 0; mouse.y = 0;
+    } else {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
 
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
+    // 2. Raycast to find what we clicked
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
 
-            if (intersects.length > 0) {
-                let obj = intersects[0].object;
-                let isApaji = false;
+    if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        let buildingFound = "";
 
-                // Check if the clicked part belongs to the Apaji building group
-                obj.traverseAncestors((ancestor) => {
-                    if (ancestor.name === "apaji_building") isApaji = true;
-                });
-                if (obj.name === "apaji_building") isApaji = true;
-
-                if (isApaji) {
-                    showApajiInfo();
-                }
-            }
+        // 3. Identify the building by its group name
+        obj.traverseAncestors((ancestor) => {
+            if (ancestor.name === "apaji_building") buildingFound = "apaji";
+            if (ancestor.name === "post_office") buildingFound = "po";
+            if (ancestor.name === "sbi_bank") buildingFound = "sbi";
         });
 
+        // 4. Open the correct info window
+        if (buildingFound === "apaji") {
+            showApajiInfo();
+        } else if (buildingFound === "po") {
+            showPostOfficeInfo();
+        } else if (buildingFound === "sbi") {
+            showSBIInfo();
+        }
+    }
+});
         // This opens the window
         // This function must be attached to 'window' to be "seen" by the button
         // This makes the function global so the HTML button 'onclick' can find it
@@ -534,52 +540,129 @@ chatInput.addEventListener("keydown", async (e) => { // Added 'async'
 // POST OFFICE
 function createPostOffice() {
     const poGroup = new THREE.Group();
+    poGroup.name = "post_office"; // Added for interaction identification
+    
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(25, 12, 15), bodyMat); body.position.y = 6; poGroup.add(body);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(25, 12, 15), bodyMat); 
+    body.position.y = 6; 
+    poGroup.add(body);
+    
     const roofMat = new THREE.MeshStandardMaterial({ color: 0xb22222 });
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(26, 1, 16), roofMat); roof.position.y = 12; poGroup.add(roof);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(26, 1, 16), roofMat); 
+    roof.position.y = 12; 
+    poGroup.add(roof);
+    
     const doorMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(4, 7), doorMat); door.position.set(-2, 3.5, 7.51); poGroup.add(door);
-    const signCanvas = document.createElement("canvas"); const signCtx = signCanvas.getContext("2d");
-    signCanvas.width = 256; signCanvas.height = 128; signCtx.fillStyle = "#ff0000"; signCtx.fillRect(0, 0, 256, 128);
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(4, 7), doorMat); 
+    door.position.set(-2, 3.5, 7.51); 
+    poGroup.add(door);
+    
+    const signCanvas = document.createElement("canvas"); 
+    const signCtx = signCanvas.getContext("2d");
+    signCanvas.width = 256; signCanvas.height = 128; 
+    signCtx.fillStyle = "#ff0000"; signCtx.fillRect(0, 0, 256, 128);
     signCtx.fillStyle = "#ffff00"; signCtx.font = "bold 40px Arial"; signCtx.textAlign = "center";
     signCtx.fillText("POST", 128, 50); signCtx.fillText("OFFICE", 128, 100);
-    const signBoard = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCanvas) }));
-    signBoard.position.set(6, 8, 7.52); poGroup.add(signBoard);
-    poGroup.rotation.y = Math.PI / 2; poGroup.position.set(-35, 0, 610); scene.add(poGroup);
+    
+    const signBoard = new THREE.Mesh(
+        new THREE.PlaneGeometry(8, 4), 
+        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCanvas) })
+    );
+    signBoard.position.set(6, 8, 7.52); 
+    poGroup.add(signBoard);
+    
+    poGroup.rotation.y = Math.PI / 2; 
+    poGroup.position.set(-35, 0, 610); 
+    scene.add(poGroup);
+    
     addLabel(poGroup, "Post Office", 0, 16, 7.6, 0);
 }
 createPostOffice();
+function showPostOfficeInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Banasthali Post Office";
+    content.innerText = "A post office is a government or authorized organization that provides services related to mail, parcels, money, and public communication. Its main purpose is to help people send and receive letters, documents, and goods safely.";
+    
+    modal.style.display = 'block';
+    speak("Welcome to the Post Office.");
+    if (controls) controls.unlock();
+}
 
 // SBI
 function createSBIFacility() {
     const sbiGroup = new THREE.Group();
+    sbiGroup.name = "sbi_bank"; // Added for interaction identification
+    
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
     const sbiBlue = new THREE.MeshStandardMaterial({ color: 0x00a9e0 });
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-    const bankBody = new THREE.Mesh(new THREE.BoxGeometry(30, 18, 20), wallMat); bankBody.position.y = 9; sbiGroup.add(bankBody);
-    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue); header.position.y = 16; sbiGroup.add(header);
-    const bankGate = new THREE.Mesh(new THREE.PlaneGeometry(8, 10), glassMat); bankGate.position.set(0, 5, 10.1); sbiGroup.add(bankGate);
-    for (let i = -1; i <= 1; i++) { if (i === 0) continue; const win = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), glassMat); win.position.set(i * 10, 8, 10.1); sbiGroup.add(win); }
-    const bankCanvas = document.createElement("canvas"); const bCtx = bankCanvas.getContext("2d");
+    
+    const bankBody = new THREE.Mesh(new THREE.BoxGeometry(30, 18, 20), wallMat); 
+    bankBody.position.y = 9; sbiGroup.add(bankBody);
+    
+    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue); 
+    header.position.y = 16; sbiGroup.add(header);
+    
+    const bankGate = new THREE.Mesh(new THREE.PlaneGeometry(8, 10), glassMat); 
+    bankGate.position.set(0, 5, 10.1); sbiGroup.add(bankGate);
+    
+    for (let i = -1; i <= 1; i++) { 
+        if (i === 0) continue; 
+        const win = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), glassMat); 
+        win.position.set(i * 10, 8, 10.1); sbiGroup.add(win); 
+    }
+    
+    const bankCanvas = document.createElement("canvas"); 
+    const bCtx = bankCanvas.getContext("2d");
     bankCanvas.width = 512; bankCanvas.height = 128; bCtx.fillStyle = "#00a9e0"; bCtx.fillRect(0, 0, 512, 128);
-    bCtx.fillStyle = "white"; bCtx.font = "bold 50px Arial"; bCtx.textAlign = "center"; bCtx.fillText("STATE BANK OF INDIA", 256, 80);
+    bCtx.fillStyle = "white"; bCtx.font = "bold 50px Arial"; bCtx.textAlign = "center"; 
+    bCtx.fillText("STATE BANK OF INDIA", 256, 80);
+    
     const bankSign = new THREE.Mesh(new THREE.PlaneGeometry(22, 5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bankCanvas) }));
     bankSign.position.set(0, 16, 10.6); sbiGroup.add(bankSign);
+    
     const atmGroup = new THREE.Group();
-    const atmBody = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 10), wallMat); atmBody.position.set(25, 6, 0); atmGroup.add(atmBody);
-    const atmGate = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); atmGate.position.set(25, 4, 5.1); atmGroup.add(atmGate);
-    const atmWin = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), glassMat); atmWin.position.set(30.1, 7, 0); atmWin.rotation.y = Math.PI / 2; atmGroup.add(atmWin);
-    const atmHeader = new THREE.Mesh(new THREE.BoxGeometry(11, 2, 11), sbiBlue); atmHeader.position.set(25, 12, 0); atmGroup.add(atmHeader);
-    const atmSignCanvas = document.createElement("canvas"); const aCtx = atmSignCanvas.getContext("2d");
+    const atmBody = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 10), wallMat); 
+    atmBody.position.set(25, 6, 0); atmGroup.add(atmBody);
+    
+    const atmGate = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); 
+    atmGate.position.set(25, 4, 5.1); atmGroup.add(atmGate);
+    
+    const atmHeader = new THREE.Mesh(new THREE.BoxGeometry(11, 2, 11), sbiBlue); 
+    atmHeader.position.set(25, 12, 0); atmGroup.add(atmHeader);
+    
+    const atmSignCanvas = document.createElement("canvas"); 
+    const aCtx = atmSignCanvas.getContext("2d");
     atmSignCanvas.width = 256; atmSignCanvas.height = 128; aCtx.fillStyle = "#00a9e0"; aCtx.fillRect(0, 0, 256, 128);
-    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; aCtx.textAlign = "center"; aCtx.fillText("ATM", 128, 90);
+    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; aCtx.textAlign = "center"; 
+    aCtx.fillText("ATM", 128, 90);
+    
     const atmSign = new THREE.Mesh(new THREE.PlaneGeometry(8, 3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(atmSignCanvas) }));
-    atmSign.position.set(25, 12, 5.6); atmGroup.add(atmSign); sbiGroup.add(atmGroup);
-    sbiGroup.rotation.y = Math.PI / 2; sbiGroup.position.set(-50, 0, 550); scene.add(sbiGroup);
+    atmSign.position.set(25, 12, 5.6); atmGroup.add(atmSign); 
+    
+    sbiGroup.add(atmGroup);
+    sbiGroup.rotation.y = Math.PI / 2; 
+    sbiGroup.position.set(-50, 0, 550); 
+    scene.add(sbiGroup);
+    
     addLabel(sbiGroup, "SBI Bank", 0, 20, 0, 0);
 }
-createSBIFacility();
+function showSBIInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "SBI Bank & ATM";
+    content.innerText = "State Bank of India (SBI) is a multinational, public sector banking and financial services body. The campus branch provides full banking facilities for students and staff, including savings accounts, educational loans, and a 24/7 ATM service for cash withdrawals.";
+    
+    modal.style.display = 'block';
+    speak("Welcome to State Bank of India. How can we help you today?");
+    
+    if (controls) controls.unlock();
+}
 
 // KVK
 function createKrishiVigyanKendra() {
