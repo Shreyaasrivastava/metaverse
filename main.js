@@ -860,6 +860,45 @@ function createVyayamshala() {
     gymGroup.rotation.y = -Math.PI / 2; gymGroup.position.set(-200, 0, -200); scene.add(gymGroup);
 }
 createVyayamshala();
+function createParallelRoad() {
+    const roadGroup = new THREE.Group();
+    
+    // Road dimensions: Very long to pass both buildings, width of 40 units
+    const roadWidth = 40;
+    const roadLength = 600; 
+
+    // 1. Road Surface (Dark Grey Asphalt)
+    const roadMat = new THREE.MeshStandardMaterial({ 
+        color: 0x333333, // Charcoal grey
+        roughness: 0.8 
+    });
+    const roadBase = new THREE.Mesh(new THREE.PlaneGeometry(roadWidth, roadLength), roadMat);
+    
+    // Rotate to lie flat on the ground
+    roadBase.rotation.x = -Math.PI / 2;
+    roadGroup.add(roadBase);
+
+    // 2. Road Markings (Yellow dashed line)
+    const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffdb58 });
+   
+    for (let i = -roadLength/2; i < roadLength/2; i += 20) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1, 10), stripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.y = 0.05; // Slightly above road to prevent flickering
+        stripe.position.z = i; 
+        roadGroup.add(stripe);
+    }
+
+    // 3. Positioning the Road
+    // Based on your buildings being at x = -150 and x = -200, 
+    // we place the road at x = -110 so it sits "in front" of the doors.
+    roadGroup.position.set(-230, 0.01, -100); 
+    
+    scene.add(roadGroup);
+}
+
+// Call the function
+createParallelRoad();
 
 // VIDULA MAIDAN
 function createVidulaMaidanPro() {
