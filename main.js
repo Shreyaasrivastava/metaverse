@@ -33,17 +33,11 @@ const chatHistory = document.getElementById("chat-history");
         });
         
         const data = await response.json();
-        
-        // Remove thinking indicator
-        const indicator = document.getElementById("ai-thinking");
-        if (indicator) indicator.remove();
-
-        // Return the 'reply' or an error string
-        return data.reply || data.error || "I couldn't find an answer for that.";
+        document.getElementById("ai-thinking")?.remove(); // Use optional chaining
+        return data.reply;
     } catch (error) {
-        const indicator = document.getElementById("ai-thinking");
-        if (indicator) indicator.remove();
-        return "Connection lost. Please check if server.js is running.";
+        document.getElementById("ai-thinking")?.remove();
+        return "Connection lost. Ensure server.js is running and your API key is valid.";
     }
 }
     // --- VOICE UTILITY ---
@@ -389,7 +383,6 @@ const apaji = new THREE.Group();
             if (ancestor.name === "apaji_building") buildingFound = "apaji";
             if (ancestor.name === "post_office") buildingFound = "po";
             if (ancestor.name === "sbi_bank") buildingFound = "sbi";
-            if (ancestor.name === "kvk_building") buildingFound = "kvk";
         });
 
         // 4. Open the correct info window
@@ -399,12 +392,6 @@ const apaji = new THREE.Group();
             showPostOfficeInfo();
         } else if (buildingFound === "sbi") {
             showSBIInfo();
-        }
-          else if ("buildingFound === "kvk") {
-            showKVKInfo();
-         }
-           
-}
         }
     }
 });
@@ -610,92 +597,69 @@ function showPostOfficeInfo() {
 // SBI
 function createSBIFacility() {
     const sbiGroup = new THREE.Group();
-    sbiGroup.name = "sbi_bank";
-
+    sbiGroup.name = "sbi_bank"; // Added for interaction identification
+    
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
     const sbiBlue = new THREE.MeshStandardMaterial({ color: 0x00a9e0 });
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-   //main bank body
+    
     const bankBody = new THREE.Mesh(new THREE.BoxGeometry(30, 18, 20), wallMat); 
-    bankBody.position.y = 9; 
-    sbiGroup.add(bankBody);
-    //blue header
-    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue);
-     header.position.y = 16; 
-     sbiGroup.add(header);
-     //Bank Entrance Gate
+    bankBody.position.y = 9; sbiGroup.add(bankBody);
+    
+    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue); 
+    header.position.y = 16; sbiGroup.add(header);
+    
     const bankGate = new THREE.Mesh(new THREE.PlaneGeometry(8, 10), glassMat); 
-    bankGate.position.set(0, 5, 10.1); 
-    sbiGroup.add(bankGate);
-    //windows
+    bankGate.position.set(0, 5, 10.1); sbiGroup.add(bankGate);
+    
     for (let i = -1; i <= 1; i++) { 
         if (i === 0) continue; 
         const win = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), glassMat); 
-        win.position.set(i * 10, 8, 10.1); 
-        sbiGroup.add(win); 
+        win.position.set(i * 10, 8, 10.1); sbiGroup.add(win); 
     }
-    //mainsignboard
+    
     const bankCanvas = document.createElement("canvas"); 
     const bCtx = bankCanvas.getContext("2d");
-    bankCanvas.width = 512; bankCanvas.height = 128; 
-    bCtx.fillStyle = "#00a9e0"; bCtx.fillRect(0, 0, 512, 128);
+    bankCanvas.width = 512; bankCanvas.height = 128; bCtx.fillStyle = "#00a9e0"; bCtx.fillRect(0, 0, 512, 128);
     bCtx.fillStyle = "white"; bCtx.font = "bold 50px Arial"; bCtx.textAlign = "center"; 
     bCtx.fillText("STATE BANK OF INDIA", 256, 80);
-
-    const bankSign = new THREE.Mesh(
-        new THREE.PlaneGeometry(22, 5), 
-        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bankCanvas) })
-    );
-    bankSign.position.set(0, 16, 10.6); 
-    sbiGroup.add(bankSign);
-
+    
+    const bankSign = new THREE.Mesh(new THREE.PlaneGeometry(22, 5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bankCanvas) }));
+    bankSign.position.set(0, 16, 10.6); sbiGroup.add(bankSign);
     
     const atmGroup = new THREE.Group();
     const atmBody = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 10), wallMat); 
-    atmBody.position.set(25, 6, 0); 
-    atmGroup.add(atmBody);
-
+    atmBody.position.set(25, 6, 0); atmGroup.add(atmBody);
+    
     const atmGate = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); 
-    atmGate.position.set(25, 4, 5.1); 
-    atmGroup.add(atmGate);
-
-    const atmWin = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), glassMat); 
-    atmWin.position.set(30.1, 7, 0); 
-    atmWin.rotation.y = Math.PI / 2; 
-    atmGroup.add(atmWin);
-
+    atmGate.position.set(25, 4, 5.1); atmGroup.add(atmGate);
+    
     const atmHeader = new THREE.Mesh(new THREE.BoxGeometry(11, 2, 11), sbiBlue); 
-    atmHeader.position.set(25, 12, 0); 
-    atmGroup.add(atmHeader);
-
+    atmHeader.position.set(25, 12, 0); atmGroup.add(atmHeader);
+    
     const atmSignCanvas = document.createElement("canvas"); 
     const aCtx = atmSignCanvas.getContext("2d");
-    atmSignCanvas.width = 256; atmSignCanvas.height = 128; 
-    aCtx.fillStyle = "#00a9e0"; aCtx.fillRect(0, 0, 256, 128);
-    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; 
-    aCtx.textAlign = "center"; aCtx.fillText("ATM", 128, 90);
-
-    const atmSign = new THREE.Mesh(
-    new THREE.PlaneGeometry(8, 3), 
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(atmSignCanvas) }));
-   
-    atmSign.position.set(25, 12, 5.6); 
-    atmGroup.add(atmSign); 
-
+    atmSignCanvas.width = 256; atmSignCanvas.height = 128; aCtx.fillStyle = "#00a9e0"; aCtx.fillRect(0, 0, 256, 128);
+    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; aCtx.textAlign = "center"; 
+    aCtx.fillText("ATM", 128, 90);
+    
+    const atmSign = new THREE.Mesh(new THREE.PlaneGeometry(8, 3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(atmSignCanvas) }));
+    atmSign.position.set(25, 12, 5.6); atmGroup.add(atmSign); 
+    
     sbiGroup.add(atmGroup);
-
-    sbiGroup.rotation.y = Math.PI / 2; sbiGroup.position.set(-50, 0, 550); 
+    sbiGroup.rotation.y = Math.PI / 2; 
+    sbiGroup.position.set(-50, 0, 550); 
     scene.add(sbiGroup);
+    
     addLabel(sbiGroup, "SBI Bank", 0, 20, 0, 0);
 }
-createSBIFacility();
 function showSBIInfo() {
     const modal = document.getElementById('info-modal');
     const title = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
     
     title.innerText = "SBI Bank & ATM";
-    content.innerText = "The State Bank of India (SBI) branch in Banasthali, Tonk (Rajasthan) serves the banking needs of local residents, students, and staff of Banasthali Vidyapeeth. The branch provides essential services such as opening savings and current accounts, cash deposits and withdrawals, cheque facilities, online money transfers through NEFT/RTGS/IMPS, and guidance on loans and other banking products. It also supports customers with digital banking services like internet banking and mobile banking. The SBI Banasthali branch generally operates from 10:00 AM to 6:00 PM on working days, making banking facilities easily accessible to people in the area.";
+    content.innerText = "State Bank of India (SBI) is a multinational, public sector banking and financial services body. The campus branch provides full banking facilities for students and staff, including savings accounts, educational loans, and a 24/7 ATM service for cash withdrawals.";
     
     modal.style.display = 'block';
     speak("Welcome to State Bank of India. How can we help you today?");
@@ -706,64 +670,21 @@ function showSBIInfo() {
 // KVK
 function createKrishiVigyanKendra() {
     const kvkGroup = new THREE.Group();
-    kvkGroup.name = "kvk_building";
-
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 16), wallMat); 
-    body.position.y = 6; kvkGroup.add(body);
-
+    const body = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 16), wallMat); body.position.y = 6; kvkGroup.add(body);
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); 
-    door.position.set(-3, 4, 8.01); kvkGroup.add(door);
-
-    const window = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), glassMat); 
-    window.position.set(5, 7, 8.01); kvkGroup.add(window);
-
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); door.position.set(-3, 4, 8.01); kvkGroup.add(door);
+    const window = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), glassMat); window.position.set(5, 7, 8.01); kvkGroup.add(window);
     const stairMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
-    for (let i = 0; i < 3; i++) { 
-        const step = new THREE.Mesh(new THREE.BoxGeometry(7, 0.5, 2), stairMat); 
-        step.position.set(-3, 0.25 + i * 0.5, 9 + i); 
-        kvkGroup.add(step); 
-    }
-
-    const signCanvas = document.createElement("canvas"); 
-    const sCtx = signCanvas.getContext("2d");
-    signCanvas.width = 512; signCanvas.height = 128; sCtx.fillStyle = "#ffcc00"; 
-    sCtx.fillRect(0, 0, 512, 128); 
-    sCtx.strokeStyle = "#003399"; 
-    sCtx.lineWidth = 15; sCtx.strokeRect(0, 0, 512, 128);
-    sCtx.fillStyle = "#003399"; 
-    sCtx.font = "bold 38px Arial"; sCtx.textAlign = "center"; sCtx.fillText("कृषि विज्ञान केंद्र", 256, 60); sCtx.font = "bold 22px Arial"; sCtx.fillText("KRISHI VIGYAN KENDRA", 256, 100);
-   
-    const roofSign = new THREE.Mesh(
-        new THREE.PlaneGeometry(14, 4), 
-        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCanvas) })
-    );
-    roofSign.position.set(0, 14, 7.5); 
-    kvkGroup.add(roofSign);
-
-    kvkGroup.rotation.y = Math.PI / 2;
-     kvkGroup.position.set(-70, 0, 470); 
-     scene.add(kvkGroup);
-
-     if (typeof addLabel === 'function') {
-        addLabel(kvkGroup, "Krishi Vigyan Kendra", 0, 18, 0, 0);
-    }
+    for (let i = 0; i < 3; i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(7, 0.5, 2), stairMat); step.position.set(-3, 0.25 + i * 0.5, 9 + i); kvkGroup.add(step); }
+    const signCanvas = document.createElement("canvas"); const sCtx = signCanvas.getContext("2d");
+    signCanvas.width = 512; signCanvas.height = 128; sCtx.fillStyle = "#ffcc00"; sCtx.fillRect(0, 0, 512, 128); sCtx.strokeStyle = "#003399"; sCtx.lineWidth = 15; sCtx.strokeRect(0, 0, 512, 128);
+    sCtx.fillStyle = "#003399"; sCtx.font = "bold 38px Arial"; sCtx.textAlign = "center"; sCtx.fillText("कृषि विज्ञान केंद्र", 256, 60); sCtx.font = "bold 22px Arial"; sCtx.fillText("KRISHI VIGYAN KENDRA", 256, 100);
+    const roofSign = new THREE.Mesh(new THREE.PlaneGeometry(14, 4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCanvas) }));
+    roofSign.position.set(0, 14, 7.5); kvkGroup.add(roofSign);
+    kvkGroup.rotation.y = Math.PI / 2; kvkGroup.position.set(-70, 0, 470); scene.add(kvkGroup);
 }
 createKrishiVigyanKendra();
-function showKVKInfo() {
-    const modal = document.getElementById('info-modal');
-    const title = document.getElementById('modal-title');
-    const content = document.getElementById('modal-content');
-    
-    title.innerText = "Krishi Vigyan Kendra (KVK)";
-    content.innerText = "The Krishi Vigyan Kendra (Farm Science Centre) at Banasthali is a front-line agricultural extension center. It aims to bridge the gap between agricultural research and farming practices, providing training to local farmers and rural youth, conducting on-farm testing, and promoting sustainable agricultural development in the region.";
-    
-    modal.style.display = 'block';
-    speak("Opening Information for Krishi Vigyan Kendra.");
-    
-    if (controls) controls.unlock();
-}
 
 // AROGYA MANDIR
 function createArogyaMandir() {
