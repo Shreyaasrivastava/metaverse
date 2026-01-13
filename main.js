@@ -17,7 +17,7 @@ const chatHistory = document.getElementById("chat-history");
           "You can reach the administration at info@banasthali.ac.in or check the official website for department-specific numbers.",
       };
 
-    async function getAIResponse(input) {
+   async function getAIResponse(input) {
     // Show a "Thinking..." message immediately
     const thinkingDiv = document.createElement("div");
     thinkingDiv.id = "ai-thinking";
@@ -33,11 +33,17 @@ const chatHistory = document.getElementById("chat-history");
         });
         
         const data = await response.json();
-        document.getElementById("ai-thinking")?.remove(); // Use optional chaining
-        return data.reply;
+        
+        // Remove thinking indicator
+        const indicator = document.getElementById("ai-thinking");
+        if (indicator) indicator.remove();
+
+        // Return the 'reply' or an error string
+        return data.reply || data.error || "I couldn't find an answer for that.";
     } catch (error) {
-        document.getElementById("ai-thinking")?.remove();
-        return "Connection lost. Ensure server.js is running and your API key is valid.";
+        const indicator = document.getElementById("ai-thinking");
+        if (indicator) indicator.remove();
+        return "Connection lost. Please check if server.js is running.";
     }
 }
     // --- VOICE UTILITY ---
@@ -70,23 +76,47 @@ function speak(text) {
 // 1. Press 'c' to close the modal
 // --- NEW COMBINED EVENT LISTENER ---
 // --- SIMPLIFIED KEY LISTENER (No Distance Check) ---
-document.addEventListener('keydown', (event) => {
+document.addEventListener("keydown", (e) => {
+    // 1. CHAT FOCUS LOGIC
+    // If user presses 'Enter' or 'C', release the mouse to allow typing
+    // Note: Using e.code is more reliable for game controls
+    if ((e.code === "Enter" || e.code === "KeyC") && controls.isLocked) {
+        controls.unlock();
+        // Small delay to ensure the browser has released the pointer before focusing
+        setTimeout(() => {
+            chatInput.focus();
+        }, 100);
+        return; 
+    }
+
+    // 2. TYPING CHECK
+    // Prevent any further game logic (movement/teleporting) if the user is currently typing
+    if (document.activeElement === chatInput) return;
+
+    // 3. MODAL & TELEPORT LOGIC (Only runs if NOT typing)
     
-    // 1. Press 'C' to close modal
-    if (event.key === 'c' || event.key === 'C') {
+    // Press 'C' to Close Modal
+    if (e.key === 'c' || e.key === 'C') {
         if (typeof window.closeModal === 'function') {
             window.closeModal();
         }
     }
 
-    // 2. Press 'E' to Enter Diwakar Mandir (WORKS ANYWHERE)
-    if ( event.key === 'E') {
+    // Press 'E' to Enter Diwakar Mandir
+    if (e.key === 'e' || e.key === 'E') {
         console.log("E pressed! Attempting to teleport...");
-        
-        // This command switches the page. 
-        // MAKE SURE 'diwakar_interior.html' is the exact name of your file.
+        // Ensure 'diwakar_interior.html' is in the same folder
         window.location.href = 'diwakar_interior.html';
     }
+
+    // 4. MOVEMENT LOGIC
+    // Mark the key as pressed for your movement engine
+    keys[e.code] = true;
+});
+
+// Don't forget to keep your keyup listener to stop movement!
+document.addEventListener("keyup", (e) => {
+    keys[e.code] = false;
 });
 
 // 2. Click to lock controls (re-enter the game)
@@ -417,19 +447,35 @@ const apaji = new THREE.Group();
         }
     }
     // This listener waits for you to click the screen to start walking again
-    controls.addEventListener('lock', function () {
-        // Hide the overlay and the info-modal when you start walking
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('info-modal').style.display = 'none';
-    });
+    // --- LOCK EVENT (Entering the game/walking) ---
+controls.addEventListener("lock", () => {
+    // 1. Hide the Start/Pause Overlay and the Info Modal
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('info-modal').style.display = 'none';
 
-    controls.addEventListener('unlock', function () {
-        // Show the overlay again if you aren't in a modal
-        const modal = document.getElementById('info-modal');
-        if (modal.style.display !== 'block') {
-            document.getElementById('overlay').style.display = 'block';
-        }
-    });
+    // 2. Show the Game UI (HUD and Chat)
+    hud.style.display = "block";
+    chatBox.style.display = "flex";
+
+    // 3. Security: Blur chat input so walking keys (WASD) don't type in the box
+    chatInput.blur();
+});
+
+// --- UNLOCK EVENT (Pausing/Opening Chat/Escaping) ---
+controls.addEventListener("unlock", () => {
+    // 1. Keep the HUD and Chat visible so you can still read messages
+    hud.style.display = "block";
+
+    // 2. Handle the Overlay visibility logic
+    const modal = document.getElementById('info-modal');
+    const overlay = document.getElementById('overlay');
+
+    // Only show the main "Click to Play" overlay if an info-modal ISN'T already open
+    // This prevents the screens from overlapping and looking messy
+    if (modal.style.display !== 'block') {
+        overlay.style.display = 'block';
+    }
+});
     function animate() {
     requestAnimationFrame(animate);
 
@@ -597,69 +643,92 @@ function showPostOfficeInfo() {
 // SBI
 function createSBIFacility() {
     const sbiGroup = new THREE.Group();
-    sbiGroup.name = "sbi_bank"; // Added for interaction identification
-    
+    sbiGroup.name = "sbi_bank";
+
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
     const sbiBlue = new THREE.MeshStandardMaterial({ color: 0x00a9e0 });
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-    
+   //main bank body
     const bankBody = new THREE.Mesh(new THREE.BoxGeometry(30, 18, 20), wallMat); 
-    bankBody.position.y = 9; sbiGroup.add(bankBody);
-    
-    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue); 
-    header.position.y = 16; sbiGroup.add(header);
-    
+    bankBody.position.y = 9; 
+    sbiGroup.add(bankBody);
+    //blue header
+    const header = new THREE.Mesh(new THREE.BoxGeometry(31, 4, 21), sbiBlue);
+     header.position.y = 16; 
+     sbiGroup.add(header);
+     //Bank Entrance Gate
     const bankGate = new THREE.Mesh(new THREE.PlaneGeometry(8, 10), glassMat); 
-    bankGate.position.set(0, 5, 10.1); sbiGroup.add(bankGate);
-    
+    bankGate.position.set(0, 5, 10.1); 
+    sbiGroup.add(bankGate);
+    //windows
     for (let i = -1; i <= 1; i++) { 
         if (i === 0) continue; 
         const win = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), glassMat); 
-        win.position.set(i * 10, 8, 10.1); sbiGroup.add(win); 
+        win.position.set(i * 10, 8, 10.1); 
+        sbiGroup.add(win); 
     }
-    
+    //mainsignboard
     const bankCanvas = document.createElement("canvas"); 
     const bCtx = bankCanvas.getContext("2d");
-    bankCanvas.width = 512; bankCanvas.height = 128; bCtx.fillStyle = "#00a9e0"; bCtx.fillRect(0, 0, 512, 128);
+    bankCanvas.width = 512; bankCanvas.height = 128; 
+    bCtx.fillStyle = "#00a9e0"; bCtx.fillRect(0, 0, 512, 128);
     bCtx.fillStyle = "white"; bCtx.font = "bold 50px Arial"; bCtx.textAlign = "center"; 
     bCtx.fillText("STATE BANK OF INDIA", 256, 80);
-    
-    const bankSign = new THREE.Mesh(new THREE.PlaneGeometry(22, 5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bankCanvas) }));
-    bankSign.position.set(0, 16, 10.6); sbiGroup.add(bankSign);
+
+    const bankSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(22, 5), 
+        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bankCanvas) })
+    );
+    bankSign.position.set(0, 16, 10.6); 
+    sbiGroup.add(bankSign);
+
     
     const atmGroup = new THREE.Group();
     const atmBody = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 10), wallMat); 
-    atmBody.position.set(25, 6, 0); atmGroup.add(atmBody);
-    
+    atmBody.position.set(25, 6, 0); 
+    atmGroup.add(atmBody);
+
     const atmGate = new THREE.Mesh(new THREE.PlaneGeometry(5, 8), glassMat); 
-    atmGate.position.set(25, 4, 5.1); atmGroup.add(atmGate);
-    
+    atmGate.position.set(25, 4, 5.1); 
+    atmGroup.add(atmGate);
+
+    const atmWin = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), glassMat); 
+    atmWin.position.set(30.1, 7, 0); 
+    atmWin.rotation.y = Math.PI / 2; 
+    atmGroup.add(atmWin);
+
     const atmHeader = new THREE.Mesh(new THREE.BoxGeometry(11, 2, 11), sbiBlue); 
-    atmHeader.position.set(25, 12, 0); atmGroup.add(atmHeader);
-    
+    atmHeader.position.set(25, 12, 0); 
+    atmGroup.add(atmHeader);
+
     const atmSignCanvas = document.createElement("canvas"); 
     const aCtx = atmSignCanvas.getContext("2d");
-    atmSignCanvas.width = 256; atmSignCanvas.height = 128; aCtx.fillStyle = "#00a9e0"; aCtx.fillRect(0, 0, 256, 128);
-    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; aCtx.textAlign = "center"; 
-    aCtx.fillText("ATM", 128, 90);
-    
-    const atmSign = new THREE.Mesh(new THREE.PlaneGeometry(8, 3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(atmSignCanvas) }));
-    atmSign.position.set(25, 12, 5.6); atmGroup.add(atmSign); 
-    
+    atmSignCanvas.width = 256; atmSignCanvas.height = 128; 
+    aCtx.fillStyle = "#00a9e0"; aCtx.fillRect(0, 0, 256, 128);
+    aCtx.fillStyle = "white"; aCtx.font = "bold 80px Arial"; 
+    aCtx.textAlign = "center"; aCtx.fillText("ATM", 128, 90);
+
+    const atmSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 3), 
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(atmSignCanvas) }));
+   
+    atmSign.position.set(25, 12, 5.6); 
+    atmGroup.add(atmSign); 
+
     sbiGroup.add(atmGroup);
-    sbiGroup.rotation.y = Math.PI / 2; 
-    sbiGroup.position.set(-50, 0, 550); 
+
+    sbiGroup.rotation.y = Math.PI / 2; sbiGroup.position.set(-50, 0, 550); 
     scene.add(sbiGroup);
-    
     addLabel(sbiGroup, "SBI Bank", 0, 20, 0, 0);
 }
+createSBIFacility();
 function showSBIInfo() {
     const modal = document.getElementById('info-modal');
     const title = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
     
     title.innerText = "SBI Bank & ATM";
-    content.innerText = "State Bank of India (SBI) is a multinational, public sector banking and financial services body. The campus branch provides full banking facilities for students and staff, including savings accounts, educational loans, and a 24/7 ATM service for cash withdrawals.";
+    content.innerText = "The State Bank of India (SBI) branch in Banasthali, Tonk (Rajasthan) serves the banking needs of local residents, students, and staff of Banasthali Vidyapeeth. The branch provides essential services such as opening savings and current accounts, cash deposits and withdrawals, cheque facilities, online money transfers through NEFT/RTGS/IMPS, and guidance on loans and other banking products. It also supports customers with digital banking services like internet banking and mobile banking. The SBI Banasthali branch generally operates from 10:00 AM to 6:00 PM on working days, making banking facilities easily accessible to people in the area.";
     
     modal.style.display = 'block';
     speak("Welcome to State Bank of India. How can we help you today?");
@@ -1655,76 +1724,73 @@ function checkProximity() {
     window.navMode = "";
     window.isWalking = false;
 
-    // --- FINAL RE-CALIBRATED COORDINATES ---
+    // --- UPDATED COORDINATES & GAPS ---
     const locs = {
         'MukhyaDwar': { x: 0, y: 5, z: 700, look: { x: 0, y: 5, z: 740 } },
-        
-        // Departments (Main Road)
         'PostOffice': { x: -10, y: 5, z: 610, look: { x: -35, y: 5, z: 610 } },
-        'SBI':        { x: -20, y: 5, z: 550, look: { x: -50, y: 5, z: 550 } },
-        'Hospital':   { x: -30, y: 5, z: 420, look: { x: -60, y: 5, z: 420 } },
-        'Nursing':    { x: 20, y: 5, z: 390, look: { x: 50, y: 5, z: 390 } },
+        'Hospital':   { x: -25, y: 5, z: 420, look: { x: -60, y: 5, z: 420 } },
+        'Nursing':    { x: 15, y: 5, z: 390, look: { x: 50, y: 5, z: 390 } },
+        'KVK':        { x: -30, y: 5, z: 470, look: { x: -70, y: 5, z: 470 } },
         
-        // FIXED: Apaji & Vani Mandir (Standing on the right side road facing the entrance)
-        'Apaji':      { x: 195, y: 10, z: -195, look: { x: 150, y: 10, z: -195 } },
-        'VaniMandir': { x: 210, y: 12, z: -370, look: { x: 150, y: 12, z: -370 } },
-        'Diwakar':    { x: 350, y: 10, z: -180, look: { x: 350, y: 10, z: -220 } },
+        // Diwakar Mandir (New Addition)
+        'Diwakar':    { x: 280, y: 10, z: -180, look: { x: 320, y: 10, z: -180 } },
         
-        // Market & ATMs
-        'NewMarket':  { x: -20, y: 5, z: -130, look: { x: -50, y: 5, z: -130 } }, 
-        'ICICIATM':   { x: 10, y: 5, z: -130, look: { x: -25, y: 5, z: -130 } },
+        'Apaji':      { x: 70, y: 10, z: -195, look: { x: 110, y: 10, z: -195 } },
+        'VaniMandir': { x: 100, y: 12, z: -370, look: { x: 150, y: 12, z: -370 } },
+        
+        // New Market - Shifted 10 units more back & towards road
+        'NewMarket':  { x: -5, y: 5, z: -130, look: { x: -25, y: 5, z: -130 } },
+        
+        'Prabha':     { x: -35, y: 5, z: -150, look: { x: -70, y: 5, z: -150 } },
+        'Pragya':     { x: -35, y: 5, z: -250, look: { x: -70, y: 5, z: -250 } },
         
         // Hostels
-        'Saudh':      { x: -40, y: 5, z: -20, look: { x: -80, y: 5, z: -20 } },
-        'Sadam':      { x: -110, y: 5, z: 40, look: { x: -155, y: 5, z: 40 } },
-        'Peetham':    { x: -160, y: 5, z: 130, look: { x: -205, y: 5, z: 130 } },
-        'Chaitanyam': { x: -50, y: 5, z: 250, look: { x: -95, y: 5, z: 250 } }
+        'Saudh':      { x: -30, y: 5, z: -20, look: { x: -65, y: 5, z: -20 } },
+        'Sadam':      { x: -75, y: 5, z: 40, look: { x: -115, y: 5, z: 40 } },
+        'Peetham':    { x: -125, y: 5, z: 130, look: { x: -165, y: 5, z: 130 } },
+        'Chaitanyam': { x: -30, y: 5, z: 250, look: { x: -65, y: 5, z: 250 } }
     };
 
     const menuHTML = `
-    <div id="nav-launcher" onclick="window.toggleMiniMap()" style="position:fixed; right:20px; bottom:40px; z-index:10000; cursor:pointer; background:#111; border:2px solid #00ffcc; border-radius:50%; width:65px; height:65px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px #00ffcc;">
-        <span style="font-size:30px;">📍</span>
+    <div id="nav-launcher" onclick="window.toggleMiniMap()" style="position:fixed; right:20px; bottom:40px; z-index:10000; cursor:pointer; background:#111; border:2px solid #00ffcc; border-radius:50%; width:65px; height:65px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 0 15px #00ffcc;">
+        <span style="font-size:9px; color:#00ffcc; font-family:sans-serif;">SHIFT+M</span>
+        <span style="font-size:24px;">📍</span>
     </div>
-
-    <div id="main-tele-panel" style="position:fixed; right:-350px; top:50%; transform:translateY(-50%); background:rgba(10, 10, 10, 0.98); width:270px; padding:20px; border:2px solid #00ffcc; border-radius:20px 0 0 20px; color:white; font-family:sans-serif; z-index:9999; transition:0.4s; box-shadow:-10px 0 30px rgba(0,0,0,0.8);">
-        <h3 style="text-align:center; color:#00ffcc; margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">CAMPUS GUIDE</h3>
-        
+    <div id="main-tele-panel" style="position:fixed; right:-350px; top:50%; transform:translateY(-50%); background:rgba(10, 10, 10, 0.98); width:280px; padding:20px; border:2px solid #00ffcc; border-radius:20px 0 0 20px; color:white; font-family:sans-serif; z-index:9999; transition:0.4s;">
+        <h3 style="text-align:center; color:#00ffcc; border-bottom:1px solid #333; padding-bottom:10px;">CAMPUS GUIDE</h3>
         <div id="v-modes" style="display:flex; flex-direction:column; gap:12px;">
-            <button class="nav-btn-main" onclick="window.hSelect('MukhyaDwar')">🏠 Main Entrance</button>
-            <button class="nav-btn-main" onclick="window.openSub('direct')">⚡ Instant Jump</button>
-            <button class="nav-btn-main" onclick="window.openSub('walk')">🛤️ Auto Walk to Gate</button>
+            <button class="nav-btn-main" onclick="window.hSelect('MukhyaDwar')">Main Entrance</button>
+            <button class="nav-btn-main" onclick="window.openSub('direct')">Instant Jump</button>
+            <button class="nav-btn-main" onclick="window.openSub('walk')">Road Navigation</button>
         </div>
-
-        <div id="v-depts" style="display:none; flex-direction:column; gap:8px;">
-            <span onclick="window.backToMain()" style="color:#00ffcc; cursor:pointer; font-weight:bold; font-size:12px;">← MODES</span>
+        <div id="v-depts" style="display:none; flex-direction:column; gap:8px; overflow-y:auto; max-height:450px;">
+            <span onclick="window.backToMain()" style="color:#00ffcc; cursor:pointer; font-size:12px;">BACK</span>
             <button class="nav-btn-sub" onclick="window.hSelect('PostOffice')">Post Office</button>
-            <button class="nav-btn-sub" onclick="window.hSelect('SBI')">SBI Bank & ATM</button>
             <button class="nav-btn-sub" onclick="window.hSelect('Hospital')">Arogya Mandir</button>
-            <button class="nav-btn-sub" onclick="window.hSelect('Nursing')">Nursing Faculty</button>
-            <button class="nav-btn-sub" onclick="window.hSelect('Apaji')">Apaji Institute</button>
             <button class="nav-btn-sub" onclick="window.hSelect('Diwakar')">Diwakar Mandir</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Nursing')">Faculty of Nursing</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('KVK')">Krishi Vigyan Kendra</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('NewMarket')">New Market</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Apaji')">Apaji Institute</button>
             <button class="nav-btn-sub" onclick="window.hSelect('VaniMandir')">Vani Mandir</button>
-            <button class="nav-btn-sub" style="color:#00ffcc; border-color:#00ffcc;" onclick="window.hSelect('NewMarket')">🛒 New Market</button>
-            <button class="nav-btn-sub" onclick="window.hSelect('ICICIATM')">🏧 ICICI ATM</button>
-            <button class="nav-btn-main" style="border-color:#ff9900; color:#ff9900; margin-top:5px;" onclick="window.openHostels()">🏢 HOSTELS LIST →</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Prabha')">Prabha Mandir</button>
+            <button class="nav-btn-sub" onclick="window.hSelect('Pragya')">Pragya Mandir</button>
+            <button class="nav-btn-main" style="border-color:#ff9900; color:#ff9900;" onclick="window.openHostels()">HOSTELS LIST</button>
         </div>
-
         <div id="v-hostels" style="display:none; flex-direction:column; gap:8px;">
-            <span onclick="window.openSub(window.navMode)" style="color:#ff9900; cursor:pointer; font-weight:bold; font-size:12px;">← DEPARTMENTS</span>
+            <span onclick="window.openSub(window.navMode)" style="color:#ff9900; cursor:pointer; font-size:12px;">BACK</span>
             <button class="nav-btn-sub" onclick="window.hSelect('Saudh')">Shanta Saudh</button>
             <button class="nav-btn-sub" onclick="window.hSelect('Sadam')">Shanta Sadam</button>
             <button class="nav-btn-sub" onclick="window.hSelect('Peetham')">Peetham Hostel</button>
             <button class="nav-btn-sub" onclick="window.hSelect('Chaitanyam')">Shanta Chaitanyam</button>
         </div>
     </div>
-
     <style>
-        .nav-btn-main { background:#000; color:#00ffcc; border:1px solid #00ffcc; padding:12px; cursor:pointer; border-radius:8px; font-weight:bold; width:100%; transition:0.2s; }
-        .nav-btn-sub { background:#1a1a1a; color:white; border:1px solid #444; padding:9px; cursor:pointer; border-radius:5px; text-align:left; font-size:13px; width:100%; }
-        .nav-btn-sub:hover { border-color:#00ffcc; background:#222; transform: translateX(5px); }
-        .nav-btn-main:hover { background:#00ffcc; color:#000; box-shadow:0 0 10px #00ffcc; }
+        .nav-btn-main { background:#000; color:#00ffcc; border:1px solid #00ffcc; padding:12px; cursor:pointer; border-radius:8px; width:100%; font-weight:bold; }
+        .nav-btn-sub { background:#1a1a1a; color:white; border:1px solid #444; padding:10px; cursor:pointer; border-radius:5px; text-align:left; font-size:13px; width:100%; }
+        .nav-btn-sub:hover { border-color:#00ffcc; color:#00ffcc; }
     </style>`;
-    
+
     document.body.insertAdjacentHTML('beforeend', menuHTML);
 
     window.toggleMiniMap = function() {
@@ -1735,61 +1801,55 @@ function checkProximity() {
             if (document.exitPointerLock) document.exitPointerLock();
         } else {
             panel.style.right = "-350px";
-            setTimeout(window.backToMain, 300);
         }
     };
 
-    window.openSub = (m) => {
-        window.navMode = m;
-        document.getElementById('v-modes').style.display = 'none';
-        document.getElementById('v-hostels').style.display = 'none';
-        document.getElementById('v-depts').style.display = 'flex';
-    };
+    window.openSub = (m) => { window.navMode = m; document.getElementById('v-modes').style.display = 'none'; document.getElementById('v-depts').style.display = 'flex'; };
+    window.openHostels = () => { document.getElementById('v-depts').style.display = 'none'; document.getElementById('v-hostels').style.display = 'flex'; };
+    window.backToMain = () => { document.getElementById('v-modes').style.display = 'flex'; document.getElementById('v-depts').style.display = 'none'; document.getElementById('v-hostels').style.display = 'none'; };
 
-    window.openHostels = () => {
-        document.getElementById('v-depts').style.display = 'none';
-        document.getElementById('v-hostels').style.display = 'flex';
-    };
-
-    window.backToMain = () => {
-        document.getElementById('v-modes').style.display = 'flex';
-        document.getElementById('v-depts').style.display = 'none';
-        document.getElementById('v-hostels').style.display = 'none';
-    };
-
-    window.hSelect = function(key) {
+    window.hSelect = async function(key) {
         window.toggleMiniMap();
-        if (typeof camera === 'undefined') return;
-
         const t = locs[key];
-        const lookTarget = new THREE.Vector3(t.look.x, t.look.y, t.look.z);
+        const lookT = new THREE.Vector3(t.look.x, t.look.y, t.look.z);
 
-        if (window.navMode === 'direct' || key === 'MukhyaDwar') {
+        if (window.navMode === 'direct') {
             camera.position.set(t.x, t.y, t.z);
-            camera.lookAt(lookTarget);
-        } else {
-            if (window.isWalking) return;
-            window.isWalking = true;
-            const start = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
-            let p = 0;
-            const walk = setInterval(() => {
-                p += 0.01; // Speed
-                if (p >= 1) { 
-                    clearInterval(walk); 
-                    window.isWalking = false; 
-                    camera.position.set(t.x, t.y, t.z);
-                    camera.lookAt(lookTarget);
-                    return; 
-                }
-                camera.position.x = start.x + (t.x - start.x) * p;
-                camera.position.y = start.y + (t.y - start.y) * p;
-                camera.position.z = start.z + (t.z - start.z) * p;
-                camera.lookAt(lookTarget);
-            }, 16);
+            camera.lookAt(lookT);
+            return;
         }
+
+        if (window.isWalking) return;
+        window.isWalking = true;
+
+        // NEW NAVIGATION LOGIC: Starts from current position, no forced main road return
+        const startPos = { x: camera.position.x, z: camera.position.z };
+        const midPoint = { x: 0, z: t.z }; // Alignment point on main axis relative to target
+
+        const customPath = [
+            { x: startPos.x, z: t.z }, // Move to target's Z-axis level first
+            { x: t.x, z: t.z }          // Then move to the target entrance
+        ];
+
+        for (let step of customPath) {
+            const sX = camera.position.x, sZ = camera.position.z;
+            let p = 0;
+            await new Promise(res => {
+                const loop = setInterval(() => {
+                    p += 0.003; // VERY SLOW WALK
+                    if (p >= 1) { clearInterval(loop); res(); }
+                    camera.position.x = sX + (step.x - sX) * p;
+                    camera.position.z = sZ + (step.z - sZ) * p;
+                    camera.lookAt(step.x, 5, step.z);
+                }, 16);
+            });
+        }
+
+        camera.lookAt(lookT);
+        window.isWalking = false;
     };
 
-    window.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'm') window.toggleMiniMap(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'M') window.toggleMiniMap(); });
 })();
 function animate() {
         requestAnimationFrame(animate);

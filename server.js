@@ -1,46 +1,46 @@
 const express = require("express");
-const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 PUT YOUR REAL API KEY HERE
+// 1. YOUR API KEY
 const genAI = new GoogleGenerativeAI("AIzaSyD-kJQesXSWoDMIkD6ddpOGByx6S51ifUo");
 
-// ✅ Health check
-app.get("/", (req, res) => {
-  res.send("Server is running");
-});
-
-// ✅ Chat endpoint
 app.post("/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
+  // 2026 Active Model IDs
+  const modelsToTry = [
+    "gemini-3-flash",
+    "gemini-2.5-flash",
+    "gemini-1.5-flash-002",
+  ];
 
-    if (!message) {
-      return res.status(400).json({ reply: "Message is required" });
+  for (let modelId of modelsToTry) {
+    try {
+      console.log(`Attempting to reach: ${modelId}`);
+      const model = genAI.getGenerativeModel({ model: modelId });
+
+      const prompt = `You are the official AI guide for Banasthali Vidyapith. 
+      Answer this question using your knowledge and current web data: ${req.body.message}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      console.log(`Success with ${modelId}`);
+      return res.json({ reply: text }); // Return immediately on success
+    } catch (error) {
+      console.warn(`${modelId} failed: ${error.message}`);
+      // Continue to next model in list
     }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
-    });
-
-    const result = await model.generateContent(message);
-    const reply = result.response.text();
-
-    res.json({ reply });
-
-  } catch (error) {
-    console.error("Gemini error:", error);
-    res.status(500).json({
-      reply: "AI service is currently unavailable. Please try again."
-    });
   }
+
+  // If all fail
+  res.status(500).json({
+    reply: "I'm having a major system update. Please try again in 5 minutes.",
+  });
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-});
+app.listen(3000, () => console.log("Server running on http://localhost:3000"));
