@@ -312,32 +312,237 @@ function createMainGateSign(x, z) {
 }
 createMainGateSign(-20, 725);
 
-// NAV MANDIR
-const nav = new THREE.Group();
-const navCenter = new THREE.Mesh(new THREE.BoxGeometry(30, 35, 20), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-navCenter.position.y = 17.5; nav.add(navCenter);
-const glassMat = new THREE.MeshStandardMaterial({ color: 0x0066cc, metalness: 0.9, roughness: 0.1 });
-const glassWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 30), glassMat); glassWall.position.set(0, 18, 10.1); nav.add(glassWall);
-const wingMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc });
-const leftWingNav = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), wingMat); leftWingNav.position.set(-25, 15, -2); nav.add(leftWingNav);
-const rightWingNav = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), wingMat); rightWingNav.position.set(25, 15, -2); nav.add(rightWingNav);
-const canopy = new THREE.Mesh(new THREE.BoxGeometry(22, 2, 10), new THREE.MeshStandardMaterial({ color: 0xeeeeee }));
-canopy.position.set(0, 0, 14); nav.add(canopy);
-nav.rotation.y = 0; nav.position.set(130, 0, -10); scene.add(nav);
-addLabel(nav, "प्रभा मन्दिर", 0, 38, 10.2, 0);
+// PRABHA MANDIR
+// PRABHA MANDIR DEPARTMENT
+const prabhaGroup = new THREE.Group();
+prabhaGroup.name = "prabha_mandir";
+// 1. MAIN CENTER STRUCTURE
+const prabhaCenter = new THREE.Mesh(
+    new THREE.BoxGeometry(30, 35, 20), 
+    new THREE.MeshStandardMaterial({ color: 0xffffff })
+);
+prabhaCenter.position.y = 17.5; 
+prabhaGroup.add(prabhaCenter);
 
-// OPPOSITE DEPT
-const oppositeDept = new THREE.Group();
-const oppCenter = new THREE.Mesh(new THREE.BoxGeometry(30, 35, 20), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-oppCenter.position.y = 17.5; oppositeDept.add(oppCenter);
-const oppGlassWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 30), glassMat); oppGlassWall.position.set(0, 18, 10.1); oppositeDept.add(oppGlassWall);
-const oppLeftWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), wingMat); oppLeftWing.position.set(-25, 15, -2); oppositeDept.add(oppLeftWing);
-const oppRightWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), wingMat); oppRightWing.position.set(25, 15, -2); oppositeDept.add(oppRightWing);
-const oppCanopy = new THREE.Mesh(new THREE.BoxGeometry(22, 2, 10), new THREE.MeshStandardMaterial({ color: 0xeeeeee }));
-oppCanopy.position.set(0, 10, 14); oppositeDept.add(oppCanopy);
-oppositeDept.rotation.y = Math.PI; oppositeDept.position.set(130, 0, 70); scene.add(oppositeDept);
-addLabel(oppositeDept, "प्रज्ञा मन्दिर", 0, 38, 10.2, 0);
+// 2. GLASS FRONT WALL
+const prabhaGlassMat = new THREE.MeshStandardMaterial({ 
+    color: 0x0066cc, 
+    metalness: 0.9, 
+    roughness: 0.1,
+    transparent: true,
+    opacity: 0.7 
+});
+const prabhaGlassWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 30), prabhaGlassMat); 
+prabhaGlassWall.position.set(0, 18, 10.1); 
+prabhaGroup.add(prabhaGlassWall);
 
+// 3. SIDE WINGS
+// UPDATED: Wing color changed to 0x2a8ccb to match Nav Mandir
+const prabhaWingMat = new THREE.MeshStandardMaterial({ color: 0x2a8ccb });
+
+const prabhaLeftWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), prabhaWingMat); 
+prabhaLeftWing.position.set(-25, 15, -2); 
+prabhaGroup.add(prabhaLeftWing);
+
+const prabhaRightWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), prabhaWingMat); 
+prabhaRightWing.position.set(25, 15, -2); 
+prabhaGroup.add(prabhaRightWing);
+
+// 4. CANOPY (Entrance)
+const prabhaCanopy = new THREE.Mesh(
+    new THREE.BoxGeometry(22, 2, 10), 
+    new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+);
+// Slight lift (0.5) so it doesn't flicker with the ground plane
+prabhaCanopy.position.set(0, 0.5, 14); 
+prabhaGroup.add(prabhaCanopy);
+
+// 5. PLACEMENT
+prabhaGroup.position.set(130, 0, -10); 
+scene.add(prabhaGroup);
+
+// 6. LABEL
+if (typeof addLabel === "function") {
+    addLabel(prabhaGroup, "प्रभा मन्दिर", 0, 38, 10.2, 0);
+}
+function showPrabhaMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Prabha Mandir";
+    
+    // Set the Detailed Description
+    content.innerText = "Prabha Mandir is mainly used for Finance Department classes at Banasthali Vidyapith. It serves as an academic space where lectures, discussions, and learning activities related to finance and management subjects are conducted. In addition to regular classes, Prabha Mandir is also used for seminars, workshops, academic events, and other institutional activities. This building supports both teaching and co-curricular programs, providing students with opportunities for academic learning as well as professional development.";
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback (matching your speak function)
+    if (typeof speak === "function") {
+        speak("Welcome to Prabha Mandir. This is the Department of Physics, dedicated to scientific research and academic excellence.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
+/// NAV MANDIR (Admissions Office) - Same side as Pragya, but shorter
+function createShortNavMandir() {
+    const navDept = new THREE.Group();
+    navDept.name = "nav_mandir"; 
+
+    // Materials
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0066cc, metalness: 0.9, transparent: true, opacity: 0.7 });
+    
+    // UPDATED: Wing color changed to 0x2a8ccb
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0x2a8ccb });
+
+    // 1. STRUCTURE (Height: 25)
+    const bodyHeight = 25; 
+    const navCenter = new THREE.Mesh(new THREE.BoxGeometry(30, bodyHeight, 20), whiteMat);
+    navCenter.position.y = bodyHeight / 2; 
+    navDept.add(navCenter);
+
+    const navLeftWing = new THREE.Mesh(new THREE.BoxGeometry(20, bodyHeight - 5, 15), wingMat);
+    navLeftWing.position.set(-25, (bodyHeight - 5) / 2, -2); 
+    navDept.add(navLeftWing);
+
+    const navRightWing = new THREE.Mesh(new THREE.BoxGeometry(20, bodyHeight - 5, 15), wingMat);
+    navRightWing.position.set(25, (bodyHeight - 5) / 2, -2); 
+    navDept.add(navRightWing);
+
+    // 2. GLASS WALL
+    const navGlassWall = new THREE.Mesh(new THREE.PlaneGeometry(18, bodyHeight - 5), glassMat); 
+    navGlassWall.position.set(0, (bodyHeight - 5) / 2 + 2, 10.1); 
+    navDept.add(navGlassWall);
+
+    // 3. CANOPY
+    const navCanopy = new THREE.Mesh(new THREE.BoxGeometry(22, 2, 10), new THREE.MeshStandardMaterial({ color: 0xeeeeee }));
+    navCanopy.position.set(0, 0, 14); 
+    navDept.add(navCanopy);
+
+    // 4. PLACEMENT
+    navDept.rotation.y = Math.PI; 
+    navDept.position.set(220, 0, 70); 
+    
+    if (typeof scene !== 'undefined') {
+        scene.add(navDept);
+    }
+
+    // 5. LABEL
+    if (typeof addLabel === "function") {
+        addLabel(navDept, "नव मन्दिर", 0, bodyHeight + 3, 10.2, 0);
+    }
+}
+
+createShortNavMandir();
+function showNavMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Nav Mandir (Admission Office)";
+    
+    // Set the Detailed Description
+    content.innerText = "Nav Mandir is a vital department at Banasthali Vidyapith, primarily dedicated to the admission process for new students across schools and colleges. " +
+    "Admissions generally begin around mid-June each year. Nav Mandir serves as the central office for handling admission enquiries, " +
+    "counselling, and guidance for students and parents. During the admission period, this department manages activities such as " +
+    "information dissemination, document verification, and assistance related to course selection. " +
+    "It plays a key role in ensuring that the transition into the Vidyapith is smooth and that new students receive proper guidance.";
+    
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    speak("Welcome to Nav Mandir. This is the central office for student admissions and guidance.");
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined') {
+        controls.unlock();
+    }
+}
+
+
+// --- PRAGYA MANDIR (DEPT) ---
+const pragyaDept = new THREE.Group(); 
+pragyaDept.name = "pragya_mandir";
+
+// 2. Ensure you add the right group to the scene
+scene.add(pragyaDept);
+// Materials
+const pragyaWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+const pragyaGlassMat = new THREE.MeshStandardMaterial({ 
+    color: 0x0066cc, 
+    metalness: 0.9, 
+    transparent: true, 
+    opacity: 0.7 
+});
+const pragyaAccentMat = new THREE.MeshStandardMaterial({ color: 0x2a8ccb }); // Blue color for wings
+const canopyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+
+// 1. CENTER STRUCTURE
+const pragyaCenter = new THREE.Mesh(new THREE.BoxGeometry(30, 35, 20), pragyaWhiteMat);
+pragyaCenter.position.y = 17.5; 
+pragyaDept.add(pragyaCenter);
+
+// 2. GLASS WALL (Front Facade)
+const pragyaGlassWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 30), pragyaGlassMat); 
+pragyaGlassWall.position.set(0, 18, 10.1); 
+pragyaDept.add(pragyaGlassWall);
+
+// 3. WINGS (Left & Right)
+// Left Wing
+const pragyaLeftWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), pragyaAccentMat);
+pragyaLeftWing.position.set(-25, 15, 0); 
+pragyaDept.add(pragyaLeftWing);
+
+// Right Wing
+const pragyaRightWing = new THREE.Mesh(new THREE.BoxGeometry(20, 30, 15), pragyaAccentMat);
+pragyaRightWing.position.set(25, 15, 0); 
+pragyaDept.add(pragyaRightWing);
+
+// 4. CANOPY (Entrance)
+const pragyaCanopy = new THREE.Mesh(new THREE.BoxGeometry(22, 2, 10), canopyMat);
+pragyaCanopy.position.set(0, 1, 14); // Ground level ke paas set kiya
+pragyaDept.add(pragyaCanopy);
+
+// 5. PLACEMENT & ROTATION
+pragyaDept.rotation.y = Math.PI; // Face opposite direction
+pragyaDept.position.set(130, 0, 70); 
+scene.add(pragyaDept);
+
+// 6. LABEL
+if (typeof addLabel === "function") {
+    addLabel(pragyaDept, "प्रज्ञा मन्दिर", 0, 38, 10.2, 0);
+}
+function showPragyaMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Pragya Mandir";
+    
+    // Set the Detailed Description
+    content.innerText = "Pragya Mandir is a department mainly used for counselling purposes at Banasthali Vidyapith. It is especially active during the admission period, when students and parents visit for guidance and support. The department helps in providing information about courses, admission procedures, eligibility, and related queries. Pragya Mandir plays an important role in assisting new applicants through the counselling process and ensuring that admissions are handled smoothly and efficiently.";
+    
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Pragya Mandir. This is the Faculty of Management Studies, fostering wisdom and leadership in commerce and business.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 // APAJI INSTITUTE
 const apaji = new THREE.Group();
       apaji.name = "apaji_building";
@@ -413,6 +618,9 @@ const apaji = new THREE.Group();
             if (ancestor.name === "apaji_building") buildingFound = "apaji";
             if (ancestor.name === "post_office") buildingFound = "po";
             if (ancestor.name === "sbi_bank") buildingFound = "sbi";
+            if (ancestor.name === "nav_mandir") buildingFound = "nav";
+            if (ancestor.name === "prabha_mandir") buildingFound = "prabha";
+            if (ancestor.name === "pragya_mandir") buildingFound = "pragya";
         });
 
         // 4. Open the correct info window
@@ -422,6 +630,12 @@ const apaji = new THREE.Group();
             showPostOfficeInfo();
         } else if (buildingFound === "sbi") {
             showSBIInfo();
+        } else if (buildingFound === "nav") {
+            showNavMandirInfo();
+        } else if (buildingFound === "prabha") {
+            showPrabhaMandirInfo();
+        } else if (buildingFound === "pragya") {
+            showPragyaMandirInfo();
         }
     }
 });
@@ -502,6 +716,7 @@ controls.addEventListener("unlock", () => {
 
 // VANI MANDIR
 const vani = new THREE.Group();
+vani.name = "vani_mandir";
 const mainFacade = new THREE.Mesh(new THREE.BoxGeometry(80, 28, 20), new THREE.MeshStandardMaterial({ color: 0xeee8aa })); mainFacade.position.y = 14; vani.add(mainFacade);
 const entrance = new THREE.Mesh(new THREE.BoxGeometry(20, 2, 8), new THREE.MeshStandardMaterial({ color: 0xa52a2a })); entrance.position.set(0, 12, 12); vani.add(entrance);
 for (let row = 0; row < 3; row++) {
@@ -513,6 +728,26 @@ for (let row = 0; row < 3; row++) {
 }
 vani.rotation.y = -Math.PI / 2; vani.position.set(150, 0, -370); scene.add(vani);
 addLabel(vani, "वाणी मन्दिर", 0, 32, 10.2, 0);
+function showVaniMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Vani Mandir (Department of Languages)";
+    
+    content.innerText = "Vani Mandir is a very important department at Banasthali Vidyapith. It mainly handles all official and administrative work related to students. If students need next semester forms, examination forms, or any other academic or official documents, they are provided through Vani Mandir. All formal procedures, notices, and administrative processes are managed here"+
+"In case of any grievances, issues, or queries, students are required to visit Vani Mandir to get proper guidance and solutions. Thus, Vani Mandir acts as a key link between the students and the administration, ensuring that all official work is carried out smoothly and efficiently.";
+
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to Vani Mandir, the Department of Languages.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 // --- 6. MOVEMENT CONTROLS (Fixed logic) ---
       const keys = {};
 
@@ -739,6 +974,7 @@ function showSBIInfo() {
 // KVK
 function createKrishiVigyanKendra() {
     const kvkGroup = new THREE.Group();
+    kvkGroup.name = "kvk_building";
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c });
     const body = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 16), wallMat); body.position.y = 6; kvkGroup.add(body);
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
@@ -754,10 +990,30 @@ function createKrishiVigyanKendra() {
     kvkGroup.rotation.y = Math.PI / 2; kvkGroup.position.set(-70, 0, 470); scene.add(kvkGroup);
 }
 createKrishiVigyanKendra();
+function showKVKInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Krishi Vigyan Kendra (KVK)";
+    
+    content.innerText = "Krishi Vigyan Mandir is a medical shop that provides medicines and basic healthcare products to people in the surrounding area. It is open 24 hours a day, 7 days a week, which makes it very convenient in case of emergencies. The shop is located just near Arogya Mandir, making it easy for students, staff, and local residents to quickly access medicines and health supplies at any time.Krishi Vigyan Mandir is a medical shop that provides medicines and basic healthcare products to people in the surrounding area. It is open 24 hours a day, 7 days a week, which makes it very convenient in case of emergencies. The shop is located just near Arogya Mandir, making it easy for students, staff, and local residents to quickly access medicines and health supplies at any time.";
+    
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to Krishi Vigyan Kendra. We are dedicated to agricultural innovation and rural empowerment.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // AROGYA MANDIR
 function createArogyaMandir() {
     const hospitalGroup = new THREE.Group();
+    hospitalGroup.name = "arogya_mandir";
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc });
     const mainBody = new THREE.Mesh(new THREE.BoxGeometry(40, 15, 20), wallMat); mainBody.position.y = 7.5; hospitalGroup.add(mainBody);
     const trim = new THREE.Mesh(new THREE.BoxGeometry(40.2, 0.5, 20.2), new THREE.MeshStandardMaterial({ color: 0x8b0000 })); trim.position.y = 14.8; hospitalGroup.add(trim);
@@ -777,10 +1033,30 @@ function createArogyaMandir() {
     hospitalGroup.rotation.y = Math.PI / 2; hospitalGroup.position.set(-60, 0, 420); scene.add(hospitalGroup);
 }
 createArogyaMandir();
+function showArogyaMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Arogya Mandir (University Hospital)";
+    
+    content.innerText = "Arogya Mandir is a hospital that serves the healthcare needs of people in and around the area, especially students and staff of nearby institutions. It provides medical consultation, basic treatment, and emergency care to patients. The hospital plays an important role in maintaining community health by offering timely medical support. Located close to Krishi Vigyan Mandir, which is a 24/7 medical shop, Arogya Mandir ensures that patients can easily access prescribed medicines and healthcare supplies whenever needed.";
+    
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to Arogya Mandir, our campus healthcare center dedicated to your well-being.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // NURSING
 function createNursingFaculty() {
     const nursingGroup = new THREE.Group();
+    nursingGroup.name = "nursing_faculty";
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xfffaf0 });
     const body = new THREE.Mesh(new THREE.BoxGeometry(35, 18, 20), wallMat); body.position.y = 9; nursingGroup.add(body);
     const porchRoof = new THREE.Mesh(new THREE.BoxGeometry(15, 1, 10), new THREE.MeshStandardMaterial({ color: 0xffffff })); porchRoof.position.set(0, 10, 10); nursingGroup.add(porchRoof);
@@ -797,10 +1073,28 @@ function createNursingFaculty() {
     nursingGroup.rotation.y = -Math.PI / 2; nursingGroup.position.set(50, 0, 390); scene.add(nursingGroup);
 }
 createNursingFaculty();
+function showNursingInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Faculty of Nursing";
+    
+    content.innerText = "This building is for the Nursing Department, where students receive education and practical training to become skilled and professional nurses. It is used for conducting nursing courses, classroom lectures, laboratory practice, and clinical training. The building helps students learn patient care, medical procedures, health management, and emergency services, preparing them to work efficiently in hospitals and healthcare centers.";
+    
+    if (typeof speak === "function") {
+        speak("Welcome to the Faculty of Nursing, nurturing the next generation of healthcare heroes.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // ICICI
 function createICICIATM() {
     const atmGroup = new THREE.Group();
+    atmGroup.name = "icici_atm";
     const bodyGeo = new THREE.BoxGeometry(15, 12, 12); const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeedca5 });
     const body = new THREE.Mesh(bodyGeo, bodyMat); body.position.y = 6; atmGroup.add(body);
     const glass = new THREE.Mesh(new THREE.PlaneGeometry(10, 8), new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 }));
@@ -814,6 +1108,25 @@ function createICICIATM() {
     atmGroup.position.set(-25, 0, -130); atmGroup.rotation.y = Math.PI / 2; scene.add(atmGroup);
 }
 createICICIATM();
+function showATMInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "ICICI Bank ATM";
+    
+    content.innerText = "The ICICI ATM provides 24/7 banking services for the students and staff of Banasthali Vidyapith. Located conveniently within the campus, it allows for quick cash withdrawals, balance inquiries, and other automated banking facilities, ensuring that financial services are always accessible without needing to leave the university premises.";
+    
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to the ICICI Bank ATM. Automated banking services are available here 24 hours a day.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // DIWAKAR MANDIR
 function createDiwakarMandir() {
@@ -831,6 +1144,30 @@ function createDiwakarMandir() {
     addLabel(diwakar, "दिवाकर मन्दिर", 0, 35, 9.2, 0);
 }
 createDiwakarMandir();
+function showDiwakarMandirInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Diwakar Mandir (Department of Education)";
+    
+    // Set the Detailed Description
+    content.innerText = "Diwakar Mandir is an AI (Artificial Intelligence) Center where students learn about modern technology and advanced computing. This center is used for teaching and practicing subjects related to artificial intelligence, such as machine learning, data analysis, robotics, and smart systems. It helps students develop technical skills, innovative thinking, and problem-solving abilities. Diwakar Mandir plays an important role in promoting digital education and preparing students for future careers in technology and research.";
+    
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Diwakar Mandir, the Department of Education. We are dedicated to shaping the future of teaching and learning.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // MARKET BUILDINGS
 function createRohitSnacksFacingRoad(atmX, atmZ) {
