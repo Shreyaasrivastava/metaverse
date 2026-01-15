@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // 1. YOUR API KEY
-const genAI = new GoogleGenerativeAI("Your key");
+const genAI = new GoogleGenerativeAI("AIzaSyD-kJQesXSWoDMIkD6ddpOGByx6S51ifUo");
 
 app.post("/chat", async (req, res) => {
   // 2026 Active Model IDs
