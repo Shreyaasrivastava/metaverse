@@ -312,6 +312,56 @@ function createMainGateSign(x, z) {
 }
 createMainGateSign(-20, 725);
 
+// --- MASTER EVENT SYSTEM ---
+const API_KEY = 'YOUR_API_KEY'; // Get yours for free at newsapi.org
+
+async function handleNewsSync(isOpen) {
+    const block = document.getElementById("event-block");
+    const content = document.getElementById("event-content");
+
+    if (isOpen) {
+        block.style.display = "block";
+        content.innerHTML = "<i>Syncing with Banasthali News Feed...</i>";
+
+        try {
+            // Searching for Banasthali Vidyapith specific news in India
+            const url = `https://newsapi.org/v2/everything?q=Banasthali+Vidyapith&language=en&sortBy=publishedAt&apiKey=${API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.articles && data.articles.length > 0) {
+                let html = "<b>TOP STORIES:</b><br><ul>";
+                data.articles.slice(0, 3).forEach(article => {
+                    html += `<li style="margin-bottom:10px;">${article.title}</li>`;
+                });
+                html += "</ul>";
+                content.innerHTML = html;
+            } else {
+                // Campus Fallback if no specific news is indexed today
+                content.innerHTML = "<b>LOCAL BULLETIN:</b><br>• Orientation for new batch starts Monday.<br>• Cultural events scheduled at Vani Mandir.<br>• Campus Wi-Fi maintenance tonight at 10 PM.";
+            }
+        } catch (err) {
+            content.innerHTML = "Unable to connect to live news. Please check your internet connection.";
+        }
+    } else {
+        block.style.display = "none";
+    }
+}
+
+// --- GLOBAL KEY LISTENER ---
+window.addEventListener('keydown', (event) => {
+    const pressedKey = event.key.toLowerCase();
+
+    if (pressedKey === 'o') {
+        handleNewsSync(true);
+        if (typeof controls !== 'undefined') controls.unlock(); // Unlock mouse to interact
+    }
+
+    if (pressedKey === 'x') {
+        handleNewsSync(false);
+        if (typeof controls !== 'undefined') controls.lock(); // Re-lock mouse for movement
+    }
+});
 // PRABHA MANDIR
 // PRABHA MANDIR DEPARTMENT
 const prabhaGroup = new THREE.Group();
