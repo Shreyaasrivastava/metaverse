@@ -621,6 +621,17 @@ const apaji = new THREE.Group();
             if (ancestor.name === "nav_mandir") buildingFound = "nav";
             if (ancestor.name === "prabha_mandir") buildingFound = "prabha";
             if (ancestor.name === "pragya_mandir") buildingFound = "pragya";
+            if (ancestor.name === "vani_mandir") buildingFound = "vani";
+            if (ancestor.name === "kvk_building") buildingFound = "kvk";
+            if (ancestor.name === "arogya_mandir") buildingFound = "arogya";
+            if (ancestor.name === "nursing_faculty") buildingFound = "nursing";
+            if (ancestor.name === "icici_atm") buildingFound = "atm";
+            if (ancestor.name === "Diwakar Mandir") buildingFound = "diwakar";
+            if (ancestor.name === "vyayamshala") buildingFound = "gym";
+            if (ancestor.name === "shanta_saudh") buildingFound = "shanta";
+            if (ancestor.name === "vidula_maidan") buildingFound = "vidula";
+            if (ancestor.name === "atithi_bhawan") buildingFound = "atithi";
+            if (ancestor.name === "chaitanyam_hostel") buildingFound = "chaitanyam";
         });
 
         // 4. Open the correct info window
@@ -636,7 +647,18 @@ const apaji = new THREE.Group();
             showPrabhaMandirInfo();
         } else if (buildingFound === "pragya") {
             showPragyaMandirInfo();
-        }
+        } else if (buildingFound === "vani") showVaniMandirInfo();
+        else if (buildingFound === "kvk") showKVKInfo();
+        else if (buildingFound === "arogya") showArogyaMandirInfo();
+        else if (buildingFound === "nursing") showNursingInfo();
+        else if (buildingFound === "atm") showATMInfo();
+        else if (buildingFound === "diwakar") showDiwakarMandirInfo();
+        else if (buildingFound === "gym") showVyayamshalaInfo();
+        else if (buildingFound === "shanta") showShantaSaudhInfo();
+        else if (buildingFound === "vidula") showVidulaMaidanInfo();
+        else if (buildingFound === "atithi") showAtithiBhawanInfo();
+        else if (buildingFound === "chaitanyam") showChaitanyamInfo();
+    
     }
 });
         // This opens the window
@@ -733,7 +755,7 @@ function showVaniMandirInfo() {
     const title = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
     
-    title.innerText = "Vani Mandir (Department of Languages)";
+    title.innerText = "Vani Mandir )";
     
     content.innerText = "Vani Mandir is a very important department at Banasthali Vidyapith. It mainly handles all official and administrative work related to students. If students need next semester forms, examination forms, or any other academic or official documents, they are provided through Vani Mandir. All formal procedures, notices, and administrative processes are managed here"+
 "In case of any grievances, issues, or queries, students are required to visit Vani Mandir to get proper guidance and solutions. Thus, Vani Mandir acts as a key link between the students and the administration, ensuring that all official work is carried out smoothly and efficiently.";
@@ -741,7 +763,7 @@ function showVaniMandirInfo() {
     modal.style.display = 'block';
     
     if (typeof speak === "function") {
-        speak("Welcome to Vani Mandir, the Department of Languages.");
+        speak("Welcome to Vani Mandir.");
     }
     
     if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
@@ -1218,6 +1240,7 @@ createAggarwalStore(-100,-165);
 // SHANTA SAUDH
 function createShantaSaudhFinal(x, z) {
     const saudhGroup = new THREE.Group();
+    saudhGroup.name = "shanta_saudh";
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc }); const glassMat = new THREE.MeshStandardMaterial({ color: 0x87ceeb, transparent: true, opacity: 0.6 }); const frameMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c }); const accentMat = new THREE.MeshStandardMaterial({ color: 0xa52a2a }); const doorMat = new THREE.MeshStandardMaterial({ color: 0x4e342e });
     const floorHeight = 12; const bWidth = 60; const bDepth = 25;
     for (let i = 0; i < 3; i++) {
@@ -1235,7 +1258,29 @@ function createShantaSaudhFinal(x, z) {
 }
 function addDetailedWindow(parent, x, y, z, rotationY, glassMat, frameMat) { const winGroup = new THREE.Group(); const glass = new THREE.Mesh(new THREE.PlaneGeometry(6, 7), glassMat); const frame = new THREE.Mesh(new THREE.BoxGeometry(6.5, 7.5, 0.2), frameMat); winGroup.add(frame, glass); winGroup.position.set(x, y, z); winGroup.rotation.y = rotationY; parent.add(winGroup); }
 createShantaSaudhFinal(-80, -20);
-
+function showShantaSaudhInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Shanta Soudh (hostel)";
+    
+    // Set the Detailed Description
+    content.innerText = "Shree Shanta Soudh is a hostel at Banasthali Vidyapith mainly allotted to B.Tech second-year students, especially from the CS branch. The hostel follows a disciplined routine: it closes at 8:00 PM and reopens at 5:00 AM in the morning. Students are provided with four meals a day, ensuring proper nutrition and a regular food schedule. A special feature of hostel life is Monday Night, which is organized every Monday night after dinner, allowing students to relax and enjoy time together. Overall, Shree Shanta Saud offers a structured, supportive, and comfortable residential environment that helps students balance academics and hostel life effectively.";
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Shanta Soudh.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 // SHANTA SADAM
 function createShantaSadam(x, z) {
     const sadamGroup = new THREE.Group();
@@ -1255,10 +1300,33 @@ function createShantaSadam(x, z) {
     sadamGroup.rotation.y = -Math.PI / 2; sadamGroup.position.set(x, 0, z); scene.add(sadamGroup);
 }
 createShantaSadam(-150, -20);
-
+function showShantaSadamInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Shanta Sadam (hostel)";
+    
+    // Set the Detailed Description
+    content.innerText = "Shree Shanta Sadam is a hostel at Banasthali Vidyapith mainly allotted to B.Tech first-year students. The hostel follows a disciplined routine: it closes at 8:00 PM and reopens at 5:00 AM in the morning. Students are provided with four meals a day, ensuring proper nutrition and a regular food schedule. A special feature of hostel life is Monday Night, which is organized every Monday night after dinner, allowing students to relax and enjoy time together. Overall, Shree Shanta Saud offers a structured, supportive, and comfortable residential environment that helps students balance academics and hostel life effectively.";
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Shanta Sadam");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 // VYAYAMSHALA
 function createVyayamshala() {
     const gymGroup = new THREE.Group();
+    gymGroup.name = "vyayamshala";
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); const mainBody = new THREE.Mesh(new THREE.BoxGeometry(60, 20, 25), wallMat); mainBody.position.y = 10; gymGroup.add(mainBody);
     const stoneMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c }); const porchRoof = new THREE.Mesh(new THREE.BoxGeometry(35, 2, 15), wallMat); porchRoof.position.set(0, 18, 12); gymGroup.add(porchRoof);
     const leftAccent = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 14.5), stoneMat); leftAccent.position.set(-15, 9, 12); gymGroup.add(leftAccent);
@@ -1269,6 +1337,26 @@ function createVyayamshala() {
     gymGroup.rotation.y = -Math.PI / 2; gymGroup.position.set(-200, 0, -200); scene.add(gymGroup);
 }
 createVyayamshala();
+function showVyayamshalaInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Apaji Vyayamshala (Gymnasium)";
+    
+    content.innerText = "Apaji Vyayamshala is the central gymnasium and fitness hub of Banasthali Vidyapith. It is equipped with modern exercise machinery, weight training sets, and facilities for indoor sports. The gymnasium plays a vital role in 'Physical Education' (one of the Five-Fold Education pillars), encouraging students to maintain health, discipline, and physical vigor through regular workouts and athletic training.";
+    
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to Apaji Vyayamshala, our center for physical fitness and well-being.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 function createParallelRoad() {
     const roadGroup = new THREE.Group();
     
@@ -1312,6 +1400,7 @@ createParallelRoad();
 // VIDULA MAIDAN
 function createVidulaMaidanPro() {
     const sportsGroup = new THREE.Group();
+    sportsGroup.name = "vidula_maidan";
     const sandMaidan = new THREE.Mesh(new THREE.PlaneGeometry(350, 350), new THREE.MeshStandardMaterial({ color: 0xd2b48c })); sandMaidan.rotation.x = -Math.PI / 2; sandMaidan.position.y = -0.1; sportsGroup.add(sandMaidan);
     const baseGeo = new THREE.BoxGeometry(100, 3, 160); const baseMat = new THREE.MeshStandardMaterial({ color: 0x666666 }); const platform = new THREE.Mesh(baseGeo, baseMat); platform.position.y = 1.5; sportsGroup.add(platform);
     const courtMat = new THREE.MeshStandardMaterial({ color: 0x001a4d, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }); const darkCourt = new THREE.Mesh(new THREE.PlaneGeometry(94, 154), courtMat); darkCourt.rotation.x = -Math.PI / 2; darkCourt.position.y = 3.05; sportsGroup.add(darkCourt);
@@ -1320,6 +1409,25 @@ function createVidulaMaidanPro() {
     sportsGroup.position.set(-350, 0, -200); scene.add(sportsGroup);
 }
 createVidulaMaidanPro();
+function showVidulaMaidanInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    title.innerText = "Vidula Maidan (Sports Complex)";
+    
+    content.innerText = "Vidula Maidan is the primary outdoor sports hub at Banasthali Vidyapith. It features professional-grade basketball courts and vast open grounds for various athletic activities. Sports are an integral part of the 'Physical Education' pillar of the university's Five-Fold Education (Panchmukhi Shiksha), focusing on teamwork, physical stamina, and the spirit of healthy competition among students.";
+    
+    modal.style.display = 'block';
+    
+    if (typeof speak === "function") {
+        speak("Welcome to Vidula Maidan, the heart of sports and physical excellence at Banasthali.");
+    }
+    
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 
 // TREES
 function createLushTree(x, z) {
@@ -1362,7 +1470,7 @@ createPoojaPhotoshopSimple(-35, -130);
 // --- ATITHI BHAWAN GENERATOR ---
 function createAtithiBhawan(x, z) {
     const atithiGroup = new THREE.Group();
-
+atithiGroup.name = "atithi_bhawan";
     // 1. MAIN BUILDING STRUCTURE (Double Storey)
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White/Cream
     const mainBody = new THREE.Mesh(new THREE.BoxGeometry(50, 20, 30), wallMat);
@@ -1432,7 +1540,30 @@ function createAtithiBhawan(x, z) {
 // CALL THE FUNCTION
 // X=100 (Right side of road), Z=350 (Near Nursing Faculty area)
 createAtithiBhawan(100, 250);
-
+function showAtithiBhawanInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Atithi Bhawan (Guest House)";
+    
+    // Set the Detailed Description
+    content.innerText = "Atithi Bhawan is the primary guest house facility at Banasthali Vidyapith. It provides comfortable accommodation and hospitality for visiting dignitaries, guest faculty, parents, and official university guests. With its well-maintained front lawn and quiet environment, it represents the university's tradition of 'Atithi Devo Bhava' (The guest is God), ensuring a welcoming stay for all visitors to the campus.";
+    
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Atithi Bhawan, the official university guest house.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 // BUSES
 function createBanasthaliMetaBuses() {
     // Bus Banane wala Helper Function
@@ -1655,7 +1786,7 @@ createPeethamHostel(-200, 80);
 // --- INTERACTION LOGIC ---
 function createChaitanyamHostel(x, z) {
     const hostelGroup = new THREE.Group();
-
+    hostelGroup.name = "chaitanyam_hostel";
     // 1. MAIN STRUCTURE (Big Hostel Building)
     const buildingGeo = new THREE.BoxGeometry(60, 25, 30);
     const buildingMat = new THREE.MeshStandardMaterial({ color: 0xFFF5E1 }); // Light Cream
@@ -1713,6 +1844,30 @@ function createChaitanyamHostel(x, z) {
 // CALLING: Atithi Bhawan (100, 250) ke samne road ke uss paar (-100, 250)
 createChaitanyamHostel(-100, 250);
 
+function showChaitanyamInfo() {
+    const modal = document.getElementById('info-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    
+    // Set the Title
+    title.innerText = "Shanta Chaitanyam Hostel";
+    
+    // Set the Detailed Description
+    content.innerText = "Shanta Chaitanyam is one of the residential hostels at Banasthali Vidyapith. It provides a safe and nurturing living environment for students, following the university's residential tradition. The hostel life is designed to foster a sense of community, discipline, and mutual respect among students, serving as a 'home away from home' while they pursue their academic goals.";
+    
+    // Display the modal
+    modal.style.display = 'block';
+    
+    // Audio feedback
+    if (typeof speak === "function") {
+        speak("Welcome to Shanta Chaitanyam Hostel, a residence for students at Banasthali Vidyapith.");
+    }
+    
+    // Unlock controls to allow mouse interaction with the popup
+    if (typeof controls !== 'undefined' && typeof controls.unlock === 'function') {
+        controls.unlock();
+    }
+}
 const interacter = new THREE.Raycaster();
 const centerPoint = new THREE.Vector2(0, 0); 
 
